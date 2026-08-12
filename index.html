@@ -223,7 +223,7 @@
     <div class="panel section">
       <h2>✏️ Custos editáveis</h2>
       <table id="custos">
-        <thead><tr><th style="width:38%">Item</th><th style="width:22%">Multiplicador</th><th style="width:16%" class="r">Valor (R$)</th><th style="width:14%" class="r">Subtotal</th><th style="width:10%"></th></tr></thead>
+        <thead><tr><th style="width:28%">Item</th><th style="width:19%">Multiplicador</th><th style="width:14%" class="r">Custo (R$)</th><th style="width:15%" class="r">Cobrado (R$)</th><th style="width:14%" class="r">Margem</th><th style="width:10%"></th></tr></thead>
         <tbody id="custosBody"></tbody>
       </table>
       <button class="addbtn" id="btnAddCusto">+ Adicionar custo</button>
@@ -231,7 +231,7 @@
         <button class="mini" id="btnZeroAll">Zerar todos</button>
         <button class="mini" id="btnResetCustos">Restaurar custos padrão</button>
       </div>
-      <div class="hint">Multiplicador: “× formando” multiplica pelo nº de formandos; “× pessoa” pelo total de pessoas; “× colaborador” pela equipe; “valor fixo” é único no evento.</div>
+      <div class="hint"><b>Custo</b> = o que a escola paga. <b>Cobrado</b> = o que é distribuído/cobrado das famílias. A diferença (margem) entra no preço por formando e no saldo/lucro. Deixe “Cobrado” igual ao “Custo” quando for só repasse.<br>Multiplicador: “× formando” multiplica pelo nº de formandos; “× pessoa” pelo total de pessoas; “× colaborador” pela equipe; “valor fixo” é único no evento.</div>
     </div>
 
     <div class="panel section">
@@ -291,23 +291,27 @@ const LOCAIS = {
 const TIPOS=[{v:'formando',l:'× formando'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'valor fixo'}];
 
 // ================= ESTADO =================
+function ci(nome,tipo,custo,cobrado){return {nome,tipo,custo,cobrado:(cobrado==null?custo:cobrado)};}
 function defaultCustos(){return [
- {nome:'Becas (locação)', tipo:'formando', valor:28},
- {nome:'Canudos', tipo:'formando', valor:22},
- {nome:'Certificados/impressões', tipo:'formando', valor:6},
- {nome:'Lembrança do formando', tipo:'formando', valor:20},
- {nome:'Fotografia', tipo:'fixo', valor:800},
- {nome:'Presente das professoras', tipo:'fixo', valor:140},
- {nome:'Transporte', tipo:'fixo', valor:150},
- {nome:'Refeição equipe', tipo:'colaborador', valor:25},
- {nome:'Decoração', tipo:'fixo', valor:300},
+ ci('Becas (locação)','formando',28),
+ ci('Canudos','formando',22),
+ ci('Certificados/impressões','formando',6),
+ ci('Lembrança do formando','formando',20),
+ ci('Fotografia','fixo',800),
+ ci('Presente das professoras','fixo',140),
+ ci('Transporte','fixo',150),
+ ci('Refeição equipe','colaborador',25),
+ ci('Decoração','fixo',300),
 ];}
+function normalizeCustos(st){if(!st||!st.custos)return;st.custos=st.custos.map(c=>('custo'in c)
+  ?{nome:c.nome,tipo:c.tipo,custo:+c.custo||0,cobrado:(c.cobrado==null||c.cobrado==='')?(+c.custo||0):(+c.cobrado||0)}
+  :{nome:c.nome,tipo:c.tipo,custo:+c.valor||0,cobrado:+c.valor||0});}
 function defaultState(){return {turma:'n5',fmt:'cer',local:'fep',formandos:22,inclusos:2,extras:2,colab:20,marg:10,combo:0,venueManual:false,venueValor:0,precoDef:0,custos:defaultCustos()};}
 let S = defaultState();
 let scenarios = [];
 const LS='formaturas2026';
 function persist(){try{localStorage.setItem(LS,JSON.stringify({S,scenarios}));}catch(e){}}
-function restore(){try{const d=JSON.parse(localStorage.getItem(LS));if(d&&d.S){S=d.S;scenarios=d.scenarios||[];}}catch(e){}}
+function restore(){try{const d=JSON.parse(localStorage.getItem(LS));if(d&&d.S){S=d.S;scenarios=d.scenarios||[];normalizeCustos(S);scenarios.forEach(s=>normalizeCustos(s.state));}}catch(e){}}
 
 // ================= CÁLCULO =================
 function itemMult(tipo,ctx){return tipo==='formando'?ctx.F:tipo==='pessoa'?ctx.N:tipo==='colaborador'?ctx.colab:1;}
@@ -321,22 +325,25 @@ function calc(key, st){
   const comboOn = L.cinema && st.combo>0;
   const comboCost = comboOn ? st.combo*N : 0;
   const ctx={F,N,colab};
-  const custosDet=(st.custos||[]).map(c=>({nome:c.nome,tipo:c.tipo,valor:+c.valor||0,total:(+c.valor||0)*itemMult(c.tipo,ctx)}));
-  const custosSum=custosDet.reduce((a,b)=>a+b.total,0);
+  const custosDet=(st.custos||[]).map(c=>{const custo=+c.custo||0,cobrado=(c.cobrado==null||c.cobrado==='')?custo:(+c.cobrado||0);
+    const mult=itemMult(c.tipo,ctx);return {nome:c.nome,tipo:c.tipo,custo,cobrado,mult,totalCusto:custo*mult,totalCobrado:cobrado*mult,margem:(cobrado-custo)*mult};});
+  const custosSum=custosDet.reduce((a,b)=>a+b.totalCusto,0);   // custo dos itens
+  const markupItens=custosDet.reduce((a,b)=>a+b.margem,0);     // margem cobrada acima do custo
   const custoTotal=custoLocal+comboCost+custosSum;
   const margFrac=st.marg/100;
   const baseMarg = comboOn ? st.combo : L.marg(N);
   const pExtra=Math.ceil((baseMarg*(1+margFrac))/5)*5;
   const recExtras=nExtras*pExtra;
   const alvo=custoTotal*(1+margFrac);
-  const pFormEq=Math.max(0,(alvo-recExtras)/F);          // preço de equilíbrio (calculado)
+  const pFormEq=Math.max(0,(alvo-recExtras)/F);            // preço p/ cobrir custos + reserva
+  const pFormSug=pFormEq + markupItens/F;                  // + margem cobrada nos itens
   const usaDef=(+st.precoDef||0)>0;
-  const pForm=usaDef?(+st.precoDef):pFormEq;              // preço usado na projeção
+  const pForm=usaDef?(+st.precoDef):pFormSug;              // preço usado na projeção
   const receita=pForm*F+recExtras;
-  const saldo=receita-custoTotal;                         // saldo/lucro projetado
+  const saldo=receita-custoTotal;                          // saldo/lucro projetado
   const lucroForm=saldo/F;
   const overCap=L.cap>0 && N>L.cap;
-  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,custoTotal,pForm,pFormEq,usaDef,pExtra,recExtras,receita,saldo,lucroForm,overCap};
+  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,recExtras,receita,saldo,lucroForm,overCap};
 }
 
 // ================= UI: segments/sliders =================
@@ -392,14 +399,15 @@ function buildCustos(){
   tb.innerHTML=S.custos.map((c,i)=>`<tr>
     <td><input type="text" data-i="${i}" data-k="nome" value="${esc(c.nome)}"></td>
     <td><select data-i="${i}" data-k="tipo">${TIPOS.map(t=>`<option value="${t.v}" ${c.tipo==t.v?'selected':''}>${t.l}</option>`).join('')}</select></td>
-    <td class="r"><input type="number" min="0" data-i="${i}" data-k="valor" value="${c.valor}"></td>
-    <td class="r ci-amt" data-i="${i}">—</td>
+    <td class="r"><input type="number" min="0" data-i="${i}" data-k="custo" value="${c.custo}"></td>
+    <td class="r"><input type="number" min="0" data-i="${i}" data-k="cobrado" value="${c.cobrado}"></td>
+    <td class="r ci-marg" data-i="${i}">—</td>
     <td class="r"><button class="mini" data-act="zero" data-i="${i}">zerar</button> <button class="mini del" data-act="del" data-i="${i}">✕</button></td>
   </tr>`).join('');
 }
 document.getElementById('custosBody').addEventListener('input',e=>{
   const i=+e.target.dataset.i, k=e.target.dataset.k; if(k==null)return;
-  S.custos[i][k]= k==='valor'? (+e.target.value||0) : e.target.value;
+  S.custos[i][k]= (k==='custo'||k==='cobrado')? (+e.target.value||0) : e.target.value;
   updateAmounts();renderResults();persist();
 });
 document.getElementById('custosBody').addEventListener('change',e=>{
@@ -408,14 +416,14 @@ document.getElementById('custosBody').addEventListener('change',e=>{
 document.getElementById('custosBody').addEventListener('click',e=>{
   const act=e.target.dataset.act; if(!act)return;
   const i=+e.target.dataset.i;
-  if(act==='zero'){S.custos[i].valor=0;}
+  if(act==='zero'){S.custos[i].custo=0;S.custos[i].cobrado=0;}
   if(act==='del'){S.custos.splice(i,1);}
   buildCustos();renderAll();persist();
 });
-document.getElementById('btnAddCusto').onclick=()=>{S.custos.push({nome:'Novo custo',tipo:'fixo',valor:0});buildCustos();renderAll();persist();};
-document.getElementById('btnZeroAll').onclick=()=>{S.custos.forEach(c=>c.valor=0);buildCustos();renderAll();persist();toast('Todos os custos zerados');};
+document.getElementById('btnAddCusto').onclick=()=>{S.custos.push({nome:'Novo custo',tipo:'fixo',custo:0,cobrado:0});buildCustos();renderAll();persist();};
+document.getElementById('btnZeroAll').onclick=()=>{S.custos.forEach(c=>{c.custo=0;c.cobrado=0;});buildCustos();renderAll();persist();toast('Todos os custos zerados');};
 document.getElementById('btnResetCustos').onclick=()=>{S.custos=defaultCustos();buildCustos();renderAll();persist();toast('Custos padrão restaurados');};
-function updateAmounts(){const r=calc(S.local);document.querySelectorAll('#custosBody .ci-amt').forEach(td=>{const i=+td.dataset.i;td.textContent=r.custosDet[i]?BRL(r.custosDet[i].total):'—';});}
+function updateAmounts(){const r=calc(S.local);document.querySelectorAll('#custosBody .ci-marg').forEach(td=>{const i=+td.dataset.i;const d=r.custosDet[i];if(!d){td.textContent='—';return;}td.textContent=BRL(d.margem);td.style.color=d.margem>0?'#2E9E5B':(d.margem<0?'#C0392B':'#6B7787');});}
 
 // ================= RENDER =================
 function renderAll(){buildCustos();updateAmounts();renderResults();renderScenarios();persist();}
@@ -423,7 +431,7 @@ function renderResults(){
   const r=calc(S.local);
   document.getElementById('localHint').textContent=r.L.obs;
   document.getElementById('kForm').textContent=BRL(r.pForm);
-  document.getElementById('kFormSub').textContent=r.usaDef?`definido · equilíbrio ${BRL(r.pFormEq)}`:(S.marg>0?`equilíbrio · inclui ${S.marg}% reserva`:'no equilíbrio');
+  document.getElementById('kFormSub').textContent=r.usaDef?`definido · sugerido ${BRL(r.pFormSug)}`:(r.markupItens!==0?`sugerido · equilíbrio ${BRL(r.pFormEq)}`:(S.marg>0?`equilíbrio · ${S.marg}% reserva`:'no equilíbrio'));
   document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
   document.getElementById('kPpl').textContent=r.N;
   document.getElementById('kPplSub').textContent=`${r.F} form. + ${r.F*r.incl} inclusos + ${r.nExtras} extras + ${r.colab} equipe`;
@@ -449,7 +457,7 @@ function renderResults(){
   const palette=['#2E74B5','#8E44AD','#5B9BD5','#8AB6DE','#2E9E5B','#7FC79A','#C77700','#E0A458','#9AA7B5','#D98880','#48C9B0','#F4D03F'];
   let parts=[{n:'Local',v:r.custoLocal,c:'#1F3864'}];
   if(r.comboCost>0)parts.push({n:'Combo pipoca',v:r.comboCost,c:'#8E44AD'});
-  r.custosDet.forEach((d,i)=>{if(d.total>0)parts.push({n:d.nome,v:d.total,c:palette[i%palette.length]});});
+  r.custosDet.forEach((d,i)=>{if(d.totalCusto>0)parts.push({n:d.nome,v:d.totalCusto,c:palette[i%palette.length]});});
   const tot=parts.reduce((a,b)=>a+b.v,0)||1;
   let acc=0;const segsC=parts.map(p=>{const a0=acc/tot*360;acc+=p.v;return `${p.c} ${a0}deg ${acc/tot*360}deg`;}).join(',');
   document.getElementById('donut').innerHTML=`<div style="width:150px;height:150px;border-radius:50%;background:conic-gradient(${segsC});position:relative">
@@ -461,6 +469,7 @@ function renderResults(){
   document.getElementById('fin').innerHTML=`
     <tr><th>Item</th><th class="r">Valor</th></tr>
     <tr><td>Receita formandos (${r.F} × ${BRL(r.pForm)})</td><td class="r">${BRL(r.pForm*r.F)}</td></tr>
+    ${r.markupItens!==0?`<tr><td style="color:#6B7787">↳ inclui margem de itens (cobrado − custo)</td><td class="r" style="color:${r.markupItens>=0?'#2E9E5B':'#C0392B'}">${BRL(r.markupItens)}</td></tr>`:''}
     <tr><td>Receita extras (${r.nExtras} × ${BRL(r.pExtra)})</td><td class="r">${BRL(r.recExtras)}</td></tr>
     <tr class="total"><td class="tot">Receita total</td><td class="r tot">${BRL(r.receita)}</td></tr>
     <tr><td>Custo total</td><td class="r">− ${BRL(r.custoTotal)}</td></tr>
@@ -502,7 +511,7 @@ function renderScenarios(){
 }
 document.getElementById('scList').addEventListener('click',e=>{
   const a=e.target.dataset.sc;if(!a)return;const i=+e.target.dataset.i;
-  if(a==='load'){S=JSON.parse(JSON.stringify(scenarios[i].state));syncUI();renderAll();toast('Cenário aberto');}
+  if(a==='load'){S=JSON.parse(JSON.stringify(scenarios[i].state));normalizeCustos(S);syncUI();renderAll();toast('Cenário aberto');}
   if(a==='del'){scenarios.splice(i,1);renderScenarios();persist();}
 });
 
@@ -517,16 +526,17 @@ document.getElementById('btnExport').onclick=()=>{
   toast('Dados exportados (JSON)');
 };
 function resumo(r){return {local:LOCAIS[r.key].nome,formato:r.L.fmt,turma:S.turma,formandos:r.F,pessoas:r.N,convidadosExtras:r.nExtras,
-  precoPorFormando:Math.round(r.pForm),precoEquilibrio:Math.round(r.pFormEq),precoDefinido:r.usaDef?Math.round(r.pForm):null,
-  precoConvidadoExtra:r.pExtra,custoTotal:Math.round(r.custoTotal),
+  precoPorFormando:Math.round(r.pForm),precoEquilibrio:Math.round(r.pFormEq),precoSugerido:Math.round(r.pFormSug),precoDefinido:r.usaDef?Math.round(r.pForm):null,
+  precoConvidadoExtra:r.pExtra,custoTotal:Math.round(r.custoTotal),margemItens:Math.round(r.markupItens),
   receita:Math.round(r.receita),saldo:Math.round(r.saldo),lucroProjetado:r.usaDef?Math.round(r.saldo):null,
-  custos:r.custosDet.map(d=>({item:d.nome,valor:d.valor,tipo:d.tipo,subtotal:Math.round(d.total)})),
+  custos:r.custosDet.map(d=>({item:d.nome,tipo:d.tipo,custoUnit:d.custo,cobradoUnit:d.cobrado,custoSubtotal:Math.round(d.totalCusto),cobradoSubtotal:Math.round(d.totalCobrado),margem:Math.round(d.margem)})),
   custoLocal:Math.round(r.custoLocal),comboPipoca:Math.round(r.comboCost)};}
 document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
 document.getElementById('fileImport').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
   rd.onload=()=>{try{const d=JSON.parse(rd.result);
     if(d.atual&&d.atual.state)S=d.atual.state; else if(d.S)S=d.S;
     if(d.cenarios)scenarios=d.cenarios.map(c=>({nome:c.nome,state:c.state})); else if(d.scenarios)scenarios=d.scenarios;
+    normalizeCustos(S);scenarios.forEach(s=>normalizeCustos(s.state));
     syncUI();renderAll();toast('Dados importados');
   }catch(err){toast('Arquivo inválido');}};rd.readAsText(f);};
 document.getElementById('btnResetAll').onclick=()=>{if(confirm('Resetar o cenário atual para o padrão? (os cenários salvos são mantidos)')){S=defaultState();syncUI();renderAll();toast('Cenário resetado');}};
