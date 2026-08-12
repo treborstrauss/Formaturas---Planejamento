@@ -104,6 +104,16 @@
       <div class="hint" id="localHint"></div>
     </div>
 
+    <div class="ctl" id="comboCtl">
+      <label>🍿 Combo pipoca (só no cinema)</label>
+      <div class="seg" id="segCombo">
+        <button data-combo="0" class="on">Sem combo</button>
+        <button data-combo="15">Combo P · R$15</button>
+        <button data-combo="18">Combo M · R$18</button>
+      </div>
+      <div class="hint">No Cineplus, cada pessoa ganha pipoca + bebida. Vira o custo do convidado extra.</div>
+    </div>
+
     <div class="ctl">
       <label>Nº de formandos <span class="val" id="vForm">22</span></label>
       <input type="range" id="formandos" min="8" max="30" value="22">
@@ -203,17 +213,20 @@ function interp(pts,N){N=Math.max(N,pts[0][0]);for(let i=0;i<pts.length-1;i++){c
 const dpP1=[[80,14280],[100,15640],[120,16620],[140,18000],[160,19384],[180,21980],[200,23690],[220,25150],[250,27340]];
 
 // custo(N) => custo total do local (todos os heads). marg = custo marginal por convidado extra.
+// cap = capacidade (0 = sem limite conhecido). cinema = permite combo de pipoca.
 const LOCAIS = {
-  fep:    {nome:'Auditório FEP', fmt:'cer', kids:false, custo:N=>1790, marg:()=>0, obs:'Meia diária c/ projetor. Ótimo p/ cerimônia digna e barata.'},
-  jardim: {nome:'Espaço Jardim', fmt:'cer', kids:true,  custo:N=>1550, marg:()=>0, obs:'Até 80 pessoas. Tem piscina/ping-pong, mas é "faça você mesmo".'},
-  bomjesus:{nome:'Colégio Bom Jesus', fmt:'cer', kids:false, custo:N=>4800, marg:()=>0, obs:'Espaço de cerimônia maior.'},
-  bourbon:{nome:'Bourbon', fmt:'cer', kids:false, custo:N=>8140, marg:()=>0, obs:'Opção mais sofisticada para cerimônia.'},
-  calu:   {nome:'Calu', fmt:'jantar', kids:false, custo:N=>5070+72.5*N, marg:()=>72.5, obs:'Mais barato com jantar. Música e decoração por conta da escola. Sem espaço p/ crianças.'},
-  obiava: {nome:'Obiava', fmt:'jantar', kids:true, custo:N=>6500+85*N+500, marg:()=>85, obs:'Buffet + serviços. Tem parquinho (R$500, 1 monitora). Decoração à parte.'},
-  dipal:  {nome:'Di Paladare', fmt:'jantar', kids:true, custo:N=>interp(dpP1,N), marg:N=>interp(dpP1,N)/N, obs:'Tudo incluso: espaço kids, jantar, decoração, DJ e TVs. Mínimo 80 pessoas.'},
+  fep:      {nome:'Auditório FEP', fmt:'cer', kids:false, cap:0, custo:N=>1790, marg:()=>0, obs:'Meia diária c/ projetor. Ótimo p/ cerimônia digna e barata.'},
+  cineplus5:{nome:'Cineplus — Sala Standard', fmt:'cer', kids:false, cinema:true, cap:140, custo:N=>3000, marg:()=>0, obs:'Cinema no Shopping Jardim das Américas. 140 lugares, 4h, R$3.000. Divertido; dá p/ incluir combo de pipoca.'},
+  cineplus6:{nome:'Cineplus — Sala TSX Laser', fmt:'cer', kids:false, cinema:true, cap:405, custo:N=>4800, marg:()=>0, obs:'Sala grande (405 lugares), 4h, R$4.800. Comporta as duas turmas juntas + apresentação.'},
+  jardim:   {nome:'Espaço Jardim', fmt:'cer', kids:true, cap:80, custo:N=>1550, marg:()=>0, obs:'Até 80 pessoas. Tem piscina/ping-pong, mas é "faça você mesmo".'},
+  bomjesus: {nome:'Colégio Bom Jesus', fmt:'cer', kids:false, cap:0, custo:N=>4800, marg:()=>0, obs:'Espaço de cerimônia maior.'},
+  bourbon:  {nome:'Bourbon', fmt:'cer', kids:false, cap:0, custo:N=>8140, marg:()=>0, obs:'Opção mais sofisticada para cerimônia.'},
+  calu:   {nome:'Calu', fmt:'jantar', kids:false, cap:200, custo:N=>5070+72.5*N, marg:()=>72.5, obs:'Mais barato com jantar. Música e decoração por conta da escola. Sem espaço p/ crianças.'},
+  obiava: {nome:'Obiava', fmt:'jantar', kids:true, cap:500, custo:N=>6500+85*N+500, marg:()=>85, obs:'Buffet + serviços. Tem parquinho (R$500, 1 monitora). Decoração à parte.'},
+  dipal:  {nome:'Di Paladare', fmt:'jantar', kids:true, cap:300, custo:N=>interp(dpP1,N), marg:N=>interp(dpP1,N)/N, obs:'Tudo incluso: espaço kids, jantar, decoração, DJ e TVs. Mínimo 80 pessoas.'},
 };
 
-const S = {turma:'n5', fmt:'cer', local:'fep', formandos:22, inclusos:2, extras:2, colab:20, lemb:20, foto:800, marg:10};
+const S = {turma:'n5', fmt:'cer', local:'fep', formandos:22, inclusos:2, extras:2, colab:20, lemb:20, foto:800, marg:10, combo:0};
 
 // ================= UI WIRING =================
 function seg(id,attr,cb){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
@@ -226,6 +239,7 @@ seg('segTurma','data-turma',v=>{S.turma=v;
   fillLocais();render();});
 seg('segFormato','data-fmt',v=>{S.fmt=v;fillLocais();render();});
 seg('segAdesao','data-ex',v=>{S.extras=parseFloat(v);document.getElementById('extras').value=v;document.getElementById('vExtra').textContent=v;render();});
+seg('segCombo','data-combo',v=>{S.combo=parseInt(v);render();});
 
 function slider(id,key,fmt){const el=document.getElementById(id);el.oninput=()=>{S[key]=parseFloat(el.value);document.getElementById(fmt.id).textContent=fmt.f(el.value);render();};}
 slider('formandos','formandos',{id:'vForm',f:v=>v});
@@ -257,21 +271,25 @@ function calc(key){
   const nExtras=Math.round(F*ex);
   const N=F + F*incl + nExtras + colab;
   const custoLocal=L.custo(N);
+  const comboOn = L.cinema && S.combo>0;
+  const comboCost = comboOn ? S.combo*N : 0;
   const becas=28*F, canudos=22*F, certif=6*F, lembr=S.lemb*F;
   const perFormExtras=becas+canudos+certif+lembr;
   const presenteProfs=140, transporte=150, foto=S.foto, refColab=25*colab;
-  const decor = (S.fmt=='jantar' && key!=='dipal') ? 350 : (S.fmt=='cer'?200:0);
+  const decor = (S.fmt=='jantar' && key!=='dipal') ? 350 : (L.cinema?0:(S.fmt=='cer'?200:0));
   const fixos=presenteProfs+transporte+foto+refColab+decor;
-  const custoTotal=custoLocal+perFormExtras+fixos;
+  const custoTotal=custoLocal+comboCost+perFormExtras+fixos;
   const margFrac=S.marg/100;
-  const pExtra=Math.ceil((L.marg(N)*(1+margFrac))/5)*5;
+  const baseMarg = comboOn ? S.combo : L.marg(N);
+  const pExtra=Math.ceil((baseMarg*(1+margFrac))/5)*5;
   const recExtras=nExtras*pExtra;
   const alvo=custoTotal*(1+margFrac);
   const pForm=Math.max(0,(alvo-recExtras)/F);
   const receita=pForm*F+recExtras;
   const saldo=receita-custoTotal;
-  return {L,F,incl,nExtras,N,colab,custoLocal,becas,canudos,certif,lembr,perFormExtras,
-    presenteProfs,transporte,foto,refColab,decor,fixos,custoTotal,pForm,pExtra,recExtras,receita,saldo};
+  const overCap = L.cap>0 && N>L.cap;
+  return {L,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,becas,canudos,certif,lembr,perFormExtras,
+    presenteProfs,transporte,foto,refColab,decor,fixos,custoTotal,pForm,pExtra,recExtras,receita,saldo,overCap};
 }
 
 // ================= RENDER =================
@@ -294,14 +312,16 @@ function render(){
   document.getElementById('bars').innerHTML=cand.map(c=>{
     const isBest=c.k===best.k, isSel=c.k===S.local;
     const kidsWarn=(S.turma=='n5'&&S.fmt=='jantar'&&!c.r.L.kids);
+    const capWarn=c.r.overCap;
     return `<div class="bar-row ${isSel?'sel':''}">
-      <div class="name">${c.r.L.nome}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag" style="background:#FDECEA;color:#C0392B">sem espaço p/ crianças</span>':''}<small>${c.r.N} pessoas</small></div>
+      <div class="name">${c.r.L.nome}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag" style="background:#FDECEA;color:#C0392B">sem espaço p/ crianças</span>':''}${capWarn?` <span class="tag" style="background:#FDECEA;color:#C0392B">excede ${c.r.L.cap} lugares</span>`:''}<small>${c.r.N} pessoas${c.r.L.cap>0?' · cap. '+c.r.L.cap:''}</small></div>
       <div class="track"><div class="fill ${isBest?'best':''}" style="width:${Math.max(8,c.r.pForm/max*100)}%"></div></div>
       <div class="price">${BRL(c.r.pForm)}</div></div>`;
   }).join('');
 
   const parts=[
     {n:'Local',v:r.custoLocal,c:'#2E74B5'},
+    {n:'Combo pipoca',v:r.comboCost,c:'#8E44AD'},
     {n:'Becas',v:r.becas,c:'#5B9BD5'},
     {n:'Canudos',v:r.canudos,c:'#8AB6DE'},
     {n:'Lembranças',v:r.lembr,c:'#2E9E5B'},
@@ -328,6 +348,7 @@ function render(){
   document.getElementById('detalhe').innerHTML=`
     <tr><th>Categoria</th><th>Detalhe</th><th class="r">Valor</th><th class="r">/ formando</th></tr>
     <tr><td>Local</td><td>${r.L.nome} · ${r.N} pessoas</td><td class="r">${BRL(r.custoLocal)}</td><td class="r">${BRL(r.custoLocal/r.F)}</td></tr>
+    ${r.comboCost>0?`<tr><td>🍿 Combo pipoca</td><td>${BRL(S.combo)} × ${r.N}</td><td class="r">${BRL(r.comboCost)}</td><td class="r">${BRL(r.comboCost/r.F)}</td></tr>`:''}
     <tr><td>Becas (locação)</td><td>R$28 × ${r.F}</td><td class="r">${BRL(r.becas)}</td><td class="r">R$ 28</td></tr>
     <tr><td>Canudos</td><td>R$22 × ${r.F}</td><td class="r">${BRL(r.canudos)}</td><td class="r">R$ 22</td></tr>
     <tr><td>Certificados/impressões</td><td>R$6 × ${r.F}</td><td class="r">${BRL(r.certif)}</td><td class="r">R$ 6</td></tr>
@@ -351,7 +372,9 @@ function render(){
   } else {
     msg=`<b>9º ano com jantar (~${BRL(r.pForm)}/formando):</b> adolescentes valorizam clima de festa — o Di Paladare já inclui DJ e pista. Lembre que a viagem de fim de ano também pesa no bolso das famílias.`;
   }
+  if(r.L.cinema) msg=`<b>${r.L.nome} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Alternativa divertida e barata; as famílias podem sair para comer depois. Dá para exibir vídeo/retrospectiva da turma na tela.`;
   msg+=` <br><br>💡 <b>Elasticidade:</b> com convidado extra a ${BRL(r.pExtra)}, o cenário atual prevê ${r.nExtras} extras. Se o preço sobe, tende a vir menos gente (só os pais); se cai, vêm avós e tios — mova o controle de <i>convidados extras</i> para simular.`;
+  if(r.overCap) msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> o cenário tem ${r.N} pessoas, mas ${r.L.nome} comporta ${r.L.cap}. Reduza convidados, escolha uma sala/local maior (ex.: Cineplus TSX = 405 lugares) ou divida em dois dias.<br><br>`+msg;
   document.getElementById('insight').innerHTML=msg;
 }
 
