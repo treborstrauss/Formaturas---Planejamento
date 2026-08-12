@@ -30,6 +30,12 @@
   .ctl .val{float:right;color:var(--blue);font-weight:700}
   select,input[type=number],input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
   input[type=range]{width:100%;accent-color:var(--blue);height:22px}
+  .stepper{display:flex;align-items:stretch;max-width:150px}
+  .stepper .stp{width:34px;flex:none;border:1px solid var(--line);background:#fff;font-size:16px;font-weight:700;color:var(--blue);cursor:pointer;user-select:none;line-height:1;padding:0}
+  .stepper .stp:hover{background:var(--light)}
+  .stepper .stp:first-child{border-radius:9px 0 0 9px}
+  .stepper .stp:last-child{border-radius:0 9px 9px 0}
+  .stepper input{flex:1;min-width:0;width:auto;border-radius:0;border-left:none;border-right:none;text-align:center;font-weight:700;font-size:14px;padding:7px 2px}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
   .seg button{flex:1;min-width:0;padding:9px 6px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--grey);transition:.15s}
   .seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -147,31 +153,42 @@
     </div>
 
     <div class="ctl">
-      <label>Nº de formandos <span class="val" id="vForm">22</span></label>
-      <input type="range" id="formandos" min="5" max="40" value="22">
-    </div>
-    <div class="ctl">
-      <label>Convidados <b>inclusos</b>/formando <span class="val" id="vIncl">2</span></label>
-      <input type="range" id="inclusos" min="0" max="4" value="2">
-      <div class="hint">Cobertos no valor do formando (normalmente pai + mãe).</div>
-    </div>
-    <div class="ctl">
-      <label>Convidados <b>extras</b>/formando <span class="val" id="vExtra">2</span></label>
-      <input type="range" id="extras" min="0" max="6" step="0.5" value="2">
-      <div class="seg" style="margin-top:6px" id="segAdesao">
-        <button data-ex="0.5">Preço alto</button>
-        <button data-ex="2">Médio</button>
-        <button data-ex="3.5">Preço baixo</button>
+      <label>Nº de formandos</label>
+      <div class="stepper">
+        <button class="stp" data-k="formandos" data-d="-1">−</button>
+        <input type="number" id="formandos" min="1" value="22">
+        <button class="stp" data-k="formandos" data-d="1">+</button>
       </div>
-      <div class="hint">Preço baixo → vêm avós e tios. Preço alto → só os pais.</div>
     </div>
     <div class="ctl">
-      <label>Colaboradores + professores <span class="val" id="vColab">20</span></label>
-      <input type="range" id="colab" min="0" max="30" value="20">
+      <label>Convidados <b>inclusos</b>/formando (além do estudante)</label>
+      <div class="stepper">
+        <button class="stp" data-k="inclusos" data-d="-1">−</button>
+        <input type="number" id="inclusos" min="0" value="2">
+        <button class="stp" data-k="inclusos" data-d="1">+</button>
+      </div>
+      <div class="hint">Convidados cobertos no valor do formando, <b>sem contar o estudante</b>. Ex.: 2 = pai + mãe (o estudante já entra à parte).</div>
+    </div>
+    <div class="ctl">
+      <label>Convidados <b>extras</b>/formando</label>
+      <div class="stepper">
+        <button class="stp" data-k="extras" data-d="-1">−</button>
+        <input type="number" id="extras" min="0" step="0.5" value="2">
+        <button class="stp" data-k="extras" data-d="1">+</button>
+      </div>
+      <div class="hint">Média de convidados extras por formando (aceita decimais, ex.: 2,5). Sem limite — bom para projeções maiores.</div>
+    </div>
+    <div class="ctl">
+      <label>Colaboradores + professores</label>
+      <div class="stepper">
+        <button class="stp" data-k="colab" data-d="-1">−</button>
+        <input type="number" id="colab" min="0" value="20">
+        <button class="stp" data-k="colab" data-d="1">+</button>
+      </div>
     </div>
     <div class="ctl">
       <label>Margem / reserva desejada <span class="val" id="vMarg">10%</span></label>
-      <input type="range" id="marg" min="0" max="40" value="10">
+      <input type="range" id="marg" min="0" max="100" value="10">
       <div class="hint">Folga p/ imprevistos (2025 fechou com ~36%).</div>
     </div>
     <div class="ctl" style="background:var(--light);padding:12px;border-radius:10px;margin-top:4px">
@@ -329,9 +346,12 @@ function setSeg(id,attr,val){document.querySelectorAll('#'+id+' button').forEach
 seg('segTurma','data-turma',v=>{S.turma=v;S.formandos=(v=='n5'?22:17);syncUI();renderAll();});
 seg('segFormato','data-fmt',v=>{S.fmt=v;if(!eligible(S.local))S.local=firstEligible();syncUI();renderAll();});
 seg('segCombo','data-combo',v=>{S.combo=parseInt(v);syncUI();renderAll();});
-seg('segAdesao','data-ex',v=>{S.extras=parseFloat(v);syncUI();renderAll();});
 function bindSlider(id,key){const el=document.getElementById(id);el.oninput=()=>{S[key]=parseFloat(el.value);syncLabels();renderAll();};}
-['formandos','inclusos','extras','colab','marg'].forEach(k=>bindSlider(k,k));
+['marg'].forEach(k=>bindSlider(k,k));
+function refresh(){updateAmounts();renderResults();renderScenarios();persist();}
+function bindNum(id,key,min){min=min||0;const el=document.getElementById(id);el.oninput=()=>{let v=parseFloat(el.value);if(isNaN(v)||v<min)v=min;S[key]=v;refresh();};}
+bindNum('inclusos','inclusos');bindNum('extras','extras');bindNum('formandos','formandos',1);bindNum('colab','colab');
+document.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;const inp=document.getElementById(k);const mn=+(inp.min||0);let v=(+S[k]||0)+d;if(v<mn)v=mn;S[k]=v;inp.value=v;refresh();});
 document.getElementById('local').onchange=e=>{S.local=e.target.value;syncUI();renderAll();};
 document.getElementById('venueManual').onchange=e=>{S.venueManual=e.target.checked;document.getElementById('venueValor').style.display=e.target.checked?'block':'none';renderAll();};
 document.getElementById('venueValor').oninput=e=>{S.venueValor=+e.target.value||0;renderAll();};
@@ -345,17 +365,12 @@ function fillLocais(){
   sel.value=S.local;
 }
 function syncLabels(){
-  document.getElementById('vForm').textContent=S.formandos;
-  document.getElementById('vIncl').textContent=S.inclusos;
-  document.getElementById('vExtra').textContent=S.extras;
-  document.getElementById('vColab').textContent=S.colab;
   document.getElementById('vMarg').textContent=S.marg+'%';
 }
 function syncUI(){
   setSeg('segTurma','data-turma',S.turma);
   setSeg('segFormato','data-fmt',S.fmt);
   setSeg('segCombo','data-combo',S.combo);
-  setSeg('segAdesao','data-ex',S.extras);
   fillLocais();
   document.getElementById('formandos').value=S.formandos;
   document.getElementById('inclusos').value=S.inclusos;
