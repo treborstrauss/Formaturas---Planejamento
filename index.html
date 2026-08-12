@@ -7,48 +7,55 @@
 <style>
   :root{
     --navy:#1F3864; --blue:#2E74B5; --sky:#5B9BD5; --light:#EAF1FA;
-    --green:#2E9E5B; --greenbg:#E4F4EA; --amber:#C77700; --red:#C0392B;
+    --green:#2E9E5B; --greenbg:#E4F4EA; --amber:#C77700; --red:#C0392B; --purple:#8E44AD;
     --ink:#22303F; --grey:#6B7787; --line:#DCE3EC; --card:#FFFFFF; --bg:#F4F7FB;
+    color-scheme:light;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding-bottom:60px}
-  header{background:linear-gradient(120deg,var(--navy),var(--blue));color:#fff;padding:22px 26px}
-  header h1{font-size:24px;font-weight:700;letter-spacing:.2px}
-  header p{opacity:.9;font-size:14px;margin-top:3px}
-  .wrap{max-width:1280px;margin:0 auto;padding:0 18px}
-  .grid{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
-  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  header{background:linear-gradient(120deg,var(--navy),var(--blue));color:#fff;padding:20px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  header h1{font-size:22px;font-weight:700}
+  header p{opacity:.9;font-size:13px;margin-top:3px}
+  .topbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{padding:8px 13px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{background:rgba(255,255,255,.24)}
+  .btn.solid{background:#fff;color:var(--navy);border-color:#fff}
+  .wrap{max-width:1300px;margin:0 auto;padding:0 18px}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:18px;margin-top:18px}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(30,50,80,.05)}
   .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);margin-bottom:14px;font-weight:700}
-  .ctl{margin-bottom:16px}
+  .ctl{margin-bottom:15px}
   .ctl label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
   .ctl .val{float:right;color:var(--blue);font-weight:700}
-  select,input[type=number]{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
+  select,input[type=number],input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
   input[type=range]{width:100%;accent-color:var(--blue);height:22px}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
   .seg button{flex:1;min-width:0;padding:9px 6px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--grey);transition:.15s}
   .seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .hint{font-size:11.5px;color:var(--grey);margin-top:5px;line-height:1.35}
+  .row2{display:flex;gap:8px;align-items:center}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
   @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;position:relative;overflow:hidden}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
   .kpi .lbl{font-size:12px;color:var(--grey);font-weight:600}
-  .kpi .num{font-size:27px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.1}
+  .kpi .num{font-size:26px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.1}
   .kpi .sub{font-size:11.5px;color:var(--grey);margin-top:3px}
   .kpi.hi .num{color:var(--green)} .kpi.hi{background:var(--greenbg);border-color:#BFE3CC}
   .kpi.accent{background:var(--navy)} .kpi.accent .lbl,.kpi.accent .sub{color:#cdd9ea} .kpi.accent .num{color:#fff}
   .section{margin-top:18px}
-  .bar-row{display:grid;grid-template-columns:150px 1fr 90px;align-items:center;gap:10px;margin-bottom:10px}
+  .bar-row{display:grid;grid-template-columns:160px 1fr 90px;align-items:center;gap:10px;margin-bottom:10px}
   .bar-row .name{font-size:13px;font-weight:600}
   .bar-row .name small{display:block;color:var(--grey);font-weight:400;font-size:11px}
-  .track{background:var(--light);border-radius:8px;height:26px;position:relative;overflow:hidden}
-  .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--sky),var(--blue));display:flex;align-items:center;transition:width .4s}
+  .track{background:var(--light);border-radius:8px;height:26px;overflow:hidden}
+  .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--sky),var(--blue));transition:width .4s}
   .fill.best{background:linear-gradient(90deg,#3fbf6f,var(--green))}
   .bar-row .price{text-align:right;font-weight:800;font-size:15px;color:var(--navy)}
   .bar-row.sel .name{color:var(--blue)}
   .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--greenbg);color:var(--green);margin-left:6px;vertical-align:middle}
+  .tag.warn{background:#FDECEA;color:var(--red)}
   table{width:100%;border-collapse:collapse;margin-top:6px}
-  th,td{text-align:left;padding:9px 8px;font-size:13px;border-bottom:1px solid var(--line)}
+  th,td{text-align:left;padding:8px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle}
   th{color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
   td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
   td.tot{font-weight:800;color:var(--navy)}
@@ -60,17 +67,38 @@
   .foot{font-size:11.5px;color:var(--grey);margin-top:22px;text-align:center;line-height:1.5}
   .donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
   .legend{font-size:12.5px}
-  .legend div{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .legend div{display:flex;align-items:center;gap:8px;margin-bottom:6px}
   .dot{width:12px;height:12px;border-radius:3px;flex:none}
   .pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
   .pill.ok{background:var(--greenbg);color:var(--green)} .pill.warn{background:#FDECEA;color:var(--red)}
+  /* custos table */
+  #custos td{padding:5px 6px}
+  #custos input[type=text]{padding:6px 8px;font-size:12.5px}
+  #custos input[type=number]{padding:6px 8px;font-size:12.5px;text-align:right}
+  #custos select{padding:6px 6px;font-size:12px}
+  .mini{padding:5px 8px;border:1px solid var(--line);background:#fff;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;color:var(--grey)}
+  .mini:hover{background:#f2f2f2}
+  .mini.del{color:var(--red);border-color:#f0c9c4}
+  .addbtn{margin-top:10px;padding:9px 14px;border:1px dashed var(--blue);background:var(--light);color:var(--blue);border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;width:100%}
+  .scfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .scfoot .mini{padding:8px 12px;font-size:12px}
+  .sc-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;font-size:13px}
+  .sc-item .meta{color:var(--grey);font-size:11.5px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:99}
+  .toast.show{opacity:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="wrap">
+  <div>
     <h1>🎓 Dashboard de Formaturas 2026 — Escola Renovação</h1>
-    <p>Simule cenários, compare locais e defina o preço por formando · 9º ano e Nível 5</p>
+    <p>Simule cenários, edite custos, compare locais e defina o preço por formando</p>
+  </div>
+  <div class="topbtns">
+    <button class="btn" id="btnExport">⬇️ Exportar dados</button>
+    <button class="btn" id="btnImport">⬆️ Importar</button>
+    <button class="btn" id="btnResetAll">↺ Resetar tudo</button>
+    <input type="file" id="fileImport" accept="application/json" style="display:none">
   </div>
 </header>
 
@@ -78,13 +106,14 @@
 <div class="grid">
 
   <!-- ===================== CONTROLES ===================== -->
-  <div class="panel" style="align-self:start">
-    <h2>⚙️ Parâmetros</h2>
+  <div style="align-self:start">
+   <div class="panel">
+    <h2>⚙️ Cenário</h2>
 
     <div class="ctl">
       <label>Turma</label>
       <div class="seg" id="segTurma">
-        <button data-turma="n5" class="on">Nível 5</button>
+        <button data-turma="n5">Nível 5</button>
         <button data-turma="9a">9º ano</button>
       </div>
     </div>
@@ -92,7 +121,7 @@
     <div class="ctl">
       <label>Formato do evento</label>
       <div class="seg" id="segFormato">
-        <button data-fmt="cer" class="on">Só cerimônia</button>
+        <button data-fmt="cer">Só cerimônia</button>
         <button data-fmt="jantar">Cerimônia + jantar</button>
       </div>
       <div class="hint" id="fmtHint"></div>
@@ -102,87 +131,102 @@
       <label>Local</label>
       <select id="local"></select>
       <div class="hint" id="localHint"></div>
+      <div class="row2" style="margin-top:8px">
+        <label style="margin:0;font-weight:600;font-size:12.5px"><input type="checkbox" id="venueManual"> Usar valor manual do local (R$)</label>
+      </div>
+      <input type="number" id="venueValor" min="0" placeholder="Valor total do local" style="margin-top:6px;display:none">
     </div>
 
     <div class="ctl" id="comboCtl">
       <label>🍿 Combo pipoca (só no cinema)</label>
       <div class="seg" id="segCombo">
-        <button data-combo="0" class="on">Sem combo</button>
-        <button data-combo="15">Combo P · R$15</button>
-        <button data-combo="18">Combo M · R$18</button>
+        <button data-combo="0">Sem combo</button>
+        <button data-combo="15">P · R$15</button>
+        <button data-combo="18">M · R$18</button>
       </div>
-      <div class="hint">No Cineplus, cada pessoa ganha pipoca + bebida. Vira o custo do convidado extra.</div>
     </div>
 
     <div class="ctl">
       <label>Nº de formandos <span class="val" id="vForm">22</span></label>
-      <input type="range" id="formandos" min="8" max="30" value="22">
+      <input type="range" id="formandos" min="5" max="40" value="22">
     </div>
-
     <div class="ctl">
-      <label>Convidados <b>inclusos</b> / formando <span class="val" id="vIncl">2</span></label>
+      <label>Convidados <b>inclusos</b>/formando <span class="val" id="vIncl">2</span></label>
       <input type="range" id="inclusos" min="0" max="4" value="2">
-      <div class="hint">Já cobertos no valor do formando (normalmente pai + mãe).</div>
+      <div class="hint">Cobertos no valor do formando (normalmente pai + mãe).</div>
     </div>
-
     <div class="ctl">
-      <label>Convidados <b>extras</b> / formando <span class="val" id="vExtra">2</span></label>
-      <input type="range" id="extras" min="0" max="5" step="0.5" value="2">
-      <div class="hint">Adesão por cenário de preço:</div>
+      <label>Convidados <b>extras</b>/formando <span class="val" id="vExtra">2</span></label>
+      <input type="range" id="extras" min="0" max="6" step="0.5" value="2">
       <div class="seg" style="margin-top:6px" id="segAdesao">
         <button data-ex="0.5">Preço alto</button>
-        <button data-ex="2" class="on">Médio</button>
+        <button data-ex="2">Médio</button>
         <button data-ex="3.5">Preço baixo</button>
       </div>
-      <div class="hint">Preço baixo → vêm avós, tios (mais gente). Preço alto → só os pais.</div>
+      <div class="hint">Preço baixo → vêm avós e tios. Preço alto → só os pais.</div>
     </div>
-
     <div class="ctl">
       <label>Colaboradores + professores <span class="val" id="vColab">20</span></label>
-      <input type="range" id="colab" min="4" max="26" value="20">
+      <input type="range" id="colab" min="0" max="30" value="20">
     </div>
-
-    <div class="ctl">
-      <label>Lembrança / formando (R$) <span class="val" id="vLemb">20</span></label>
-      <input type="range" id="lemb" min="0" max="120" step="5" value="20">
-      <div class="hint">2025 usou azulejo (~R$14). Faixa comum: R$60–100.</div>
-    </div>
-
-    <div class="ctl">
-      <label>Fotografia (R$ total) <span class="val" id="vFoto">800</span></label>
-      <input type="range" id="foto" min="0" max="3000" step="100" value="800">
-      <div class="hint">A confirmar — não havia valor claro em 2025.</div>
-    </div>
-
     <div class="ctl">
       <label>Margem / reserva desejada <span class="val" id="vMarg">10%</span></label>
       <input type="range" id="marg" min="0" max="40" value="10">
-      <div class="hint">Folga para imprevistos (2025 fechou com ~36%).</div>
+      <div class="hint">Folga p/ imprevistos (2025 fechou com ~36%).</div>
     </div>
+    <div class="ctl" style="background:var(--light);padding:12px;border-radius:10px;margin-top:4px">
+      <label>💵 Preço DEFINIDO por formando (R$)</label>
+      <input type="number" id="precoDef" min="0" placeholder="Vazio = usa o cálculo de equilíbrio">
+      <div class="hint">Se você já definiu o valor da cobrança, digite aqui: o painel passa a projetar o <b>lucro</b> com base nele. O preço de equilíbrio continua aparecendo como referência.</div>
+    </div>
+   </div>
+
+   <!-- CENÁRIOS SALVOS -->
+   <div class="panel" style="margin-top:18px">
+     <h2>💾 Cenários / Orçamentos</h2>
+     <div class="row2">
+       <input type="text" id="scName" placeholder="Nome do cenário (ex.: Nível 5 – Di Paladare)">
+       <button class="mini" id="btnSaveSc" style="white-space:nowrap;padding:8px 12px">Salvar</button>
+     </div>
+     <div id="scList" style="margin-top:12px"></div>
+     <div class="hint">Salve quantos cenários quiser, compare na tabela abaixo e exporte tudo para eu montar a apresentação dos pais.</div>
+   </div>
   </div>
 
   <!-- ===================== RESULTADOS ===================== -->
   <div>
     <div class="kpis">
-      <div class="kpi accent"><div class="lbl">PREÇO POR FORMANDO</div><div class="num" id="kForm">—</div><div class="sub" id="kFormSub">para fechar no equilíbrio</div></div>
-      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub">valor sugerido por pessoa</div></div>
+      <div class="kpi accent"><div class="lbl">PREÇO POR FORMANDO</div><div class="num" id="kForm">—</div><div class="sub" id="kFormSub"></div></div>
+      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub">valor sugerido/pessoa</div></div>
       <div class="kpi"><div class="lbl">TOTAL DE PESSOAS</div><div class="num" id="kPpl">—</div><div class="sub" id="kPplSub"></div></div>
-      <div class="kpi hi"><div class="lbl">SALDO PROJETADO</div><div class="num" id="kSaldo">—</div><div class="sub" id="kSaldoSub"></div></div>
+      <div class="kpi hi"><div class="lbl" id="kSaldoLbl">SALDO PROJETADO</div><div class="num" id="kSaldo">—</div><div class="sub" id="kSaldoSub"></div></div>
+    </div>
+
+    <!-- CUSTOS EDITÁVEIS -->
+    <div class="panel section">
+      <h2>✏️ Custos editáveis</h2>
+      <table id="custos">
+        <thead><tr><th style="width:38%">Item</th><th style="width:22%">Multiplicador</th><th style="width:16%" class="r">Valor (R$)</th><th style="width:14%" class="r">Subtotal</th><th style="width:10%"></th></tr></thead>
+        <tbody id="custosBody"></tbody>
+      </table>
+      <button class="addbtn" id="btnAddCusto">+ Adicionar custo</button>
+      <div class="scfoot">
+        <button class="mini" id="btnZeroAll">Zerar todos</button>
+        <button class="mini" id="btnResetCustos">Restaurar custos padrão</button>
+      </div>
+      <div class="hint">Multiplicador: “× formando” multiplica pelo nº de formandos; “× pessoa” pelo total de pessoas; “× colaborador” pela equipe; “valor fixo” é único no evento.</div>
     </div>
 
     <div class="panel section">
       <h2>📊 Comparação de locais — preço por formando neste cenário</h2>
       <div id="bars"></div>
-      <div class="hint" style="margin-top:8px">Verde = opção mais barata para as condições atuais. Só aparecem os locais compatíveis com o formato/turma selecionados.</div>
+      <div class="hint" style="margin-top:8px">Verde = mais barato nas condições atuais. Avisos em vermelho: sem espaço p/ crianças ou capacidade excedida.</div>
     </div>
 
     <div class="split">
       <div class="panel">
         <h2>🧾 Composição do custo</h2>
-        <div class="donut-wrap">
-          <div id="donut"></div>
-          <div class="legend" id="legend"></div>
-        </div>
+        <div class="donut-wrap"><div id="donut"></div><div class="legend" id="legend"></div></div>
       </div>
       <div class="panel">
         <h2>💰 Receita × Custo</h2>
@@ -190,195 +234,292 @@
       </div>
     </div>
 
-    <div class="panel section">
-      <h2>📋 Detalhamento dos custos</h2>
-      <table id="detalhe"></table>
+    <!-- COMPARATIVO CENÁRIOS -->
+    <div class="panel section" id="scCompareWrap" style="display:none">
+      <h2>📚 Comparativo dos cenários salvos</h2>
+      <table id="scCompare"></table>
     </div>
 
     <div class="callout" id="insight"></div>
     <div class="foot">
-      Valores estimados a partir dos orçamentos recebidos (tabela do Diego, Calu, Obiava, Di Paladare, Espaço Jardim, Auditório FEP) e do controle financeiro de 2025.<br>
-      Confirmar preços com os fornecedores antes de comunicar às famílias. · Escola Renovação · Julho/2026
+      Valores estimados a partir dos orçamentos recebidos (Diego, Calu, Obiava, Di Paladare, Espaço Jardim, Auditório FEP, Cineplus) e do controle financeiro de 2025.<br>
+      Confirmar preços com fornecedores antes de comunicar às famílias. · Escola Renovação · 2026
     </div>
   </div>
 
 </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ================= DADOS DOS LOCAIS =================
+// ================= UTIL =================
 const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
-
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function interp(pts,N){N=Math.max(N,pts[0][0]);for(let i=0;i<pts.length-1;i++){const[x0,y0]=pts[i],[x1,y1]=pts[i+1];if(N<=x1)return y0+(y1-y0)*(N-x0)/(x1-x0);}return pts[pts.length-1][1];}
 const dpP1=[[80,14280],[100,15640],[120,16620],[140,18000],[160,19384],[180,21980],[200,23690],[220,25150],[250,27340]];
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 
-// custo(N) => custo total do local (todos os heads). marg = custo marginal por convidado extra.
-// cap = capacidade (0 = sem limite conhecido). cinema = permite combo de pipoca.
+// ================= LOCAIS =================
 const LOCAIS = {
   fep:      {nome:'Auditório FEP', fmt:'cer', kids:false, cap:0, custo:N=>1790, marg:()=>0, obs:'Meia diária c/ projetor. Ótimo p/ cerimônia digna e barata.'},
-  cineplus5:{nome:'Cineplus — Sala Standard', fmt:'cer', kids:false, cinema:true, cap:140, custo:N=>3000, marg:()=>0, obs:'Cinema no Shopping Jardim das Américas. 140 lugares, 4h, R$3.000. Divertido; dá p/ incluir combo de pipoca.'},
-  cineplus6:{nome:'Cineplus — Sala TSX Laser', fmt:'cer', kids:false, cinema:true, cap:405, custo:N=>4800, marg:()=>0, obs:'Sala grande (405 lugares), 4h, R$4.800. Comporta as duas turmas juntas + apresentação.'},
-  jardim:   {nome:'Espaço Jardim', fmt:'cer', kids:true, cap:80, custo:N=>1550, marg:()=>0, obs:'Até 80 pessoas. Tem piscina/ping-pong, mas é "faça você mesmo".'},
+  cineplus5:{nome:'Cineplus — Sala Standard', fmt:'cer', kids:false, cinema:true, cap:140, custo:N=>3000, marg:()=>0, obs:'Cinema no Shopping Jardim das Américas. 140 lugares, 4h, R$3.000.'},
+  cineplus6:{nome:'Cineplus — Sala TSX Laser', fmt:'cer', kids:false, cinema:true, cap:405, custo:N=>4800, marg:()=>0, obs:'Sala grande (405 lugares), 4h, R$4.800. Cabe as duas turmas juntas.'},
+  jardim:   {nome:'Espaço Jardim', fmt:'cer', kids:true, cap:80, custo:N=>1550, marg:()=>0, obs:'Até 80 pessoas. Piscina/ping-pong, mas é "faça você mesmo".'},
   bomjesus: {nome:'Colégio Bom Jesus', fmt:'cer', kids:false, cap:0, custo:N=>4800, marg:()=>0, obs:'Espaço de cerimônia maior.'},
   bourbon:  {nome:'Bourbon', fmt:'cer', kids:false, cap:0, custo:N=>8140, marg:()=>0, obs:'Opção mais sofisticada para cerimônia.'},
   calu:   {nome:'Calu', fmt:'jantar', kids:false, cap:200, custo:N=>5070+72.5*N, marg:()=>72.5, obs:'Mais barato com jantar. Música e decoração por conta da escola. Sem espaço p/ crianças.'},
   obiava: {nome:'Obiava', fmt:'jantar', kids:true, cap:500, custo:N=>6500+85*N+500, marg:()=>85, obs:'Buffet + serviços. Tem parquinho (R$500, 1 monitora). Decoração à parte.'},
   dipal:  {nome:'Di Paladare', fmt:'jantar', kids:true, cap:300, custo:N=>interp(dpP1,N), marg:N=>interp(dpP1,N)/N, obs:'Tudo incluso: espaço kids, jantar, decoração, DJ e TVs. Mínimo 80 pessoas.'},
 };
+const TIPOS=[{v:'formando',l:'× formando'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'valor fixo'}];
 
-const S = {turma:'n5', fmt:'cer', local:'fep', formandos:22, inclusos:2, extras:2, colab:20, lemb:20, foto:800, marg:10, combo:0};
+// ================= ESTADO =================
+function defaultCustos(){return [
+ {nome:'Becas (locação)', tipo:'formando', valor:28},
+ {nome:'Canudos', tipo:'formando', valor:22},
+ {nome:'Certificados/impressões', tipo:'formando', valor:6},
+ {nome:'Lembrança do formando', tipo:'formando', valor:20},
+ {nome:'Fotografia', tipo:'fixo', valor:800},
+ {nome:'Presente das professoras', tipo:'fixo', valor:140},
+ {nome:'Transporte', tipo:'fixo', valor:150},
+ {nome:'Refeição equipe', tipo:'colaborador', valor:25},
+ {nome:'Decoração', tipo:'fixo', valor:300},
+];}
+function defaultState(){return {turma:'n5',fmt:'cer',local:'fep',formandos:22,inclusos:2,extras:2,colab:20,marg:10,combo:0,venueManual:false,venueValor:0,precoDef:0,custos:defaultCustos()};}
+let S = defaultState();
+let scenarios = [];
+const LS='formaturas2026';
+function persist(){try{localStorage.setItem(LS,JSON.stringify({S,scenarios}));}catch(e){}}
+function restore(){try{const d=JSON.parse(localStorage.getItem(LS));if(d&&d.S){S=d.S;scenarios=d.scenarios||[];}}catch(e){}}
 
-// ================= UI WIRING =================
-function seg(id,attr,cb){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cb(b.getAttribute(attr));});}
-
-seg('segTurma','data-turma',v=>{S.turma=v;
-  if(v=='n5'){S.formandos=22;document.getElementById('formandos').value=22;}
-  else {S.formandos=17;document.getElementById('formandos').value=17;}
-  document.getElementById('vForm').textContent=S.formandos;
-  fillLocais();render();});
-seg('segFormato','data-fmt',v=>{S.fmt=v;fillLocais();render();});
-seg('segAdesao','data-ex',v=>{S.extras=parseFloat(v);document.getElementById('extras').value=v;document.getElementById('vExtra').textContent=v;render();});
-seg('segCombo','data-combo',v=>{S.combo=parseInt(v);render();});
-
-function slider(id,key,fmt){const el=document.getElementById(id);el.oninput=()=>{S[key]=parseFloat(el.value);document.getElementById(fmt.id).textContent=fmt.f(el.value);render();};}
-slider('formandos','formandos',{id:'vForm',f:v=>v});
-slider('inclusos','inclusos',{id:'vIncl',f:v=>v});
-slider('extras','extras',{id:'vExtra',f:v=>v});
-slider('colab','colab',{id:'vColab',f:v=>v});
-slider('lemb','lemb',{id:'vLemb',f:v=>v});
-slider('foto','foto',{id:'vFoto',f:v=>v});
-slider('marg','marg',{id:'vMarg',f:v=>v+'%'});
-
-document.getElementById('local').onchange=e=>{S.local=e.target.value;render();};
-
-function eligible(key){return LOCAIS[key].fmt===S.fmt;}
-function fillLocais(){
-  const sel=document.getElementById('local');sel.innerHTML='';
-  Object.keys(LOCAIS).filter(eligible).forEach(k=>{
-    const o=document.createElement('option');o.value=k;o.textContent=LOCAIS[k].nome;sel.appendChild(o);});
-  if(!eligible(S.local)){S.local=Object.keys(LOCAIS).find(eligible);}
-  sel.value=S.local;
-  document.getElementById('fmtHint').textContent = S.fmt=='cer'
-    ? 'Só a colação de grau. Famílias saem para comer depois → bem mais barato.'
-    : 'Cerimônia seguida de jantar/festa no mesmo local.';
-}
-
-// ================= MODELO DE CÁLCULO =================
-function calc(key){
+// ================= CÁLCULO =================
+function itemMult(tipo,ctx){return tipo==='formando'?ctx.F:tipo==='pessoa'?ctx.N:tipo==='colaborador'?ctx.colab:1;}
+function calc(key, st){
+  st=st||S;
   const L=LOCAIS[key];
-  const F=S.formandos, incl=S.inclusos, ex=S.extras, colab=S.colab;
+  const F=st.formandos, incl=st.inclusos, ex=st.extras, colab=st.colab;
   const nExtras=Math.round(F*ex);
   const N=F + F*incl + nExtras + colab;
-  const custoLocal=L.custo(N);
-  const comboOn = L.cinema && S.combo>0;
-  const comboCost = comboOn ? S.combo*N : 0;
-  const becas=28*F, canudos=22*F, certif=6*F, lembr=S.lemb*F;
-  const perFormExtras=becas+canudos+certif+lembr;
-  const presenteProfs=140, transporte=150, foto=S.foto, refColab=25*colab;
-  const decor = (S.fmt=='jantar' && key!=='dipal') ? 350 : (L.cinema?0:(S.fmt=='cer'?200:0));
-  const fixos=presenteProfs+transporte+foto+refColab+decor;
-  const custoTotal=custoLocal+comboCost+perFormExtras+fixos;
-  const margFrac=S.marg/100;
-  const baseMarg = comboOn ? S.combo : L.marg(N);
+  const custoLocal=(st.venueManual && key===st.local)?(+st.venueValor||0):L.custo(N);
+  const comboOn = L.cinema && st.combo>0;
+  const comboCost = comboOn ? st.combo*N : 0;
+  const ctx={F,N,colab};
+  const custosDet=(st.custos||[]).map(c=>({nome:c.nome,tipo:c.tipo,valor:+c.valor||0,total:(+c.valor||0)*itemMult(c.tipo,ctx)}));
+  const custosSum=custosDet.reduce((a,b)=>a+b.total,0);
+  const custoTotal=custoLocal+comboCost+custosSum;
+  const margFrac=st.marg/100;
+  const baseMarg = comboOn ? st.combo : L.marg(N);
   const pExtra=Math.ceil((baseMarg*(1+margFrac))/5)*5;
   const recExtras=nExtras*pExtra;
   const alvo=custoTotal*(1+margFrac);
-  const pForm=Math.max(0,(alvo-recExtras)/F);
+  const pFormEq=Math.max(0,(alvo-recExtras)/F);          // preço de equilíbrio (calculado)
+  const usaDef=(+st.precoDef||0)>0;
+  const pForm=usaDef?(+st.precoDef):pFormEq;              // preço usado na projeção
   const receita=pForm*F+recExtras;
-  const saldo=receita-custoTotal;
-  const overCap = L.cap>0 && N>L.cap;
-  return {L,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,becas,canudos,certif,lembr,perFormExtras,
-    presenteProfs,transporte,foto,refColab,decor,fixos,custoTotal,pForm,pExtra,recExtras,receita,saldo,overCap};
+  const saldo=receita-custoTotal;                         // saldo/lucro projetado
+  const lucroForm=saldo/F;
+  const overCap=L.cap>0 && N>L.cap;
+  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,custoTotal,pForm,pFormEq,usaDef,pExtra,recExtras,receita,saldo,lucroForm,overCap};
 }
 
+// ================= UI: segments/sliders =================
+function seg(id,attr,cb){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{cb(b.getAttribute(attr));});}
+function setSeg(id,attr,val){document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',b.getAttribute(attr)==String(val)));}
+
+seg('segTurma','data-turma',v=>{S.turma=v;S.formandos=(v=='n5'?22:17);syncUI();renderAll();});
+seg('segFormato','data-fmt',v=>{S.fmt=v;if(!eligible(S.local))S.local=firstEligible();syncUI();renderAll();});
+seg('segCombo','data-combo',v=>{S.combo=parseInt(v);syncUI();renderAll();});
+seg('segAdesao','data-ex',v=>{S.extras=parseFloat(v);syncUI();renderAll();});
+function bindSlider(id,key){const el=document.getElementById(id);el.oninput=()=>{S[key]=parseFloat(el.value);syncLabels();renderAll();};}
+['formandos','inclusos','extras','colab','marg'].forEach(k=>bindSlider(k,k));
+document.getElementById('local').onchange=e=>{S.local=e.target.value;syncUI();renderAll();};
+document.getElementById('venueManual').onchange=e=>{S.venueManual=e.target.checked;document.getElementById('venueValor').style.display=e.target.checked?'block':'none';renderAll();};
+document.getElementById('venueValor').oninput=e=>{S.venueValor=+e.target.value||0;renderAll();};
+document.getElementById('precoDef').oninput=e=>{S.precoDef=+e.target.value||0;renderResults();persist();};
+
+function eligible(key){return LOCAIS[key].fmt===S.fmt;}
+function firstEligible(){return Object.keys(LOCAIS).find(eligible);}
+function fillLocais(){
+  const sel=document.getElementById('local');sel.innerHTML='';
+  Object.keys(LOCAIS).filter(eligible).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=LOCAIS[k].nome;sel.appendChild(o);});
+  sel.value=S.local;
+}
+function syncLabels(){
+  document.getElementById('vForm').textContent=S.formandos;
+  document.getElementById('vIncl').textContent=S.inclusos;
+  document.getElementById('vExtra').textContent=S.extras;
+  document.getElementById('vColab').textContent=S.colab;
+  document.getElementById('vMarg').textContent=S.marg+'%';
+}
+function syncUI(){
+  setSeg('segTurma','data-turma',S.turma);
+  setSeg('segFormato','data-fmt',S.fmt);
+  setSeg('segCombo','data-combo',S.combo);
+  setSeg('segAdesao','data-ex',S.extras);
+  fillLocais();
+  document.getElementById('formandos').value=S.formandos;
+  document.getElementById('inclusos').value=S.inclusos;
+  document.getElementById('extras').value=S.extras;
+  document.getElementById('colab').value=S.colab;
+  document.getElementById('marg').value=S.marg;
+  document.getElementById('venueManual').checked=S.venueManual;
+  document.getElementById('venueValor').style.display=S.venueManual?'block':'none';
+  document.getElementById('venueValor').value=S.venueValor||'';
+  document.getElementById('precoDef').value=S.precoDef||'';
+  document.getElementById('fmtHint').textContent = S.fmt=='cer'?'Só a colação. Famílias saem para comer depois → mais barato.':'Cerimônia seguida de jantar/festa no mesmo local.';
+  syncLabels();
+  buildCustos();
+}
+
+// ================= CUSTOS (editável) =================
+function buildCustos(){
+  const tb=document.getElementById('custosBody');
+  tb.innerHTML=S.custos.map((c,i)=>`<tr>
+    <td><input type="text" data-i="${i}" data-k="nome" value="${esc(c.nome)}"></td>
+    <td><select data-i="${i}" data-k="tipo">${TIPOS.map(t=>`<option value="${t.v}" ${c.tipo==t.v?'selected':''}>${t.l}</option>`).join('')}</select></td>
+    <td class="r"><input type="number" min="0" data-i="${i}" data-k="valor" value="${c.valor}"></td>
+    <td class="r ci-amt" data-i="${i}">—</td>
+    <td class="r"><button class="mini" data-act="zero" data-i="${i}">zerar</button> <button class="mini del" data-act="del" data-i="${i}">✕</button></td>
+  </tr>`).join('');
+}
+document.getElementById('custosBody').addEventListener('input',e=>{
+  const i=+e.target.dataset.i, k=e.target.dataset.k; if(k==null)return;
+  S.custos[i][k]= k==='valor'? (+e.target.value||0) : e.target.value;
+  updateAmounts();renderResults();persist();
+});
+document.getElementById('custosBody').addEventListener('change',e=>{
+  if(e.target.dataset.k==='tipo'){S.custos[+e.target.dataset.i].tipo=e.target.value;updateAmounts();renderResults();persist();}
+});
+document.getElementById('custosBody').addEventListener('click',e=>{
+  const act=e.target.dataset.act; if(!act)return;
+  const i=+e.target.dataset.i;
+  if(act==='zero'){S.custos[i].valor=0;}
+  if(act==='del'){S.custos.splice(i,1);}
+  buildCustos();renderAll();persist();
+});
+document.getElementById('btnAddCusto').onclick=()=>{S.custos.push({nome:'Novo custo',tipo:'fixo',valor:0});buildCustos();renderAll();persist();};
+document.getElementById('btnZeroAll').onclick=()=>{S.custos.forEach(c=>c.valor=0);buildCustos();renderAll();persist();toast('Todos os custos zerados');};
+document.getElementById('btnResetCustos').onclick=()=>{S.custos=defaultCustos();buildCustos();renderAll();persist();toast('Custos padrão restaurados');};
+function updateAmounts(){const r=calc(S.local);document.querySelectorAll('#custosBody .ci-amt').forEach(td=>{const i=+td.dataset.i;td.textContent=r.custosDet[i]?BRL(r.custosDet[i].total):'—';});}
+
 // ================= RENDER =================
-function render(){
+function renderAll(){buildCustos();updateAmounts();renderResults();renderScenarios();persist();}
+function renderResults(){
   const r=calc(S.local);
-  document.getElementById('local').value=S.local;
   document.getElementById('localHint').textContent=r.L.obs;
   document.getElementById('kForm').textContent=BRL(r.pForm);
-  document.getElementById('kFormSub').textContent = S.marg>0 ? `inclui ${S.marg}% de reserva` : 'no equilíbrio';
-  document.getElementById('kExtra').textContent = r.pExtra>0?BRL(r.pExtra):'—';
+  document.getElementById('kFormSub').textContent=r.usaDef?`definido · equilíbrio ${BRL(r.pFormEq)}`:(S.marg>0?`equilíbrio · inclui ${S.marg}% reserva`:'no equilíbrio');
+  document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
   document.getElementById('kPpl').textContent=r.N;
-  document.getElementById('kPplSub').textContent=`${r.F} formandos + ${r.F*r.incl} inclusos + ${r.nExtras} extras + ${r.colab} equipe`;
+  document.getElementById('kPplSub').textContent=`${r.F} form. + ${r.F*r.incl} inclusos + ${r.nExtras} extras + ${r.colab} equipe`;
+  document.getElementById('kSaldoLbl').textContent=r.usaDef?'LUCRO PROJETADO':'SALDO PROJETADO';
   document.getElementById('kSaldo').textContent=BRL(r.saldo);
-  document.getElementById('kSaldoSub').textContent = r.saldo>=0?'sobra sobre o custo':'FALTA cobrir';
   document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldo>=0);
+  document.getElementById('kSaldoSub').textContent=r.usaDef?(r.saldo>=0?`+${BRL(r.lucroForm)}/formando`:`${BRL(r.lucroForm)}/formando (prejuízo)`):(r.saldo>=0?'sobra sobre o custo':'FALTA cobrir');
 
+  // barras
   const cand=Object.keys(LOCAIS).filter(eligible).map(k=>({k,r:calc(k)}));
   const max=Math.max(...cand.map(c=>c.r.pForm),1);
   const best=cand.reduce((a,b)=>b.r.pForm<a.r.pForm?b:a);
   document.getElementById('bars').innerHTML=cand.map(c=>{
-    const isBest=c.k===best.k, isSel=c.k===S.local;
+    const isBest=c.k===best.k,isSel=c.k===S.local;
     const kidsWarn=(S.turma=='n5'&&S.fmt=='jantar'&&!c.r.L.kids);
-    const capWarn=c.r.overCap;
     return `<div class="bar-row ${isSel?'sel':''}">
-      <div class="name">${c.r.L.nome}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag" style="background:#FDECEA;color:#C0392B">sem espaço p/ crianças</span>':''}${capWarn?` <span class="tag" style="background:#FDECEA;color:#C0392B">excede ${c.r.L.cap} lugares</span>`:''}<small>${c.r.N} pessoas${c.r.L.cap>0?' · cap. '+c.r.L.cap:''}</small></div>
+      <div class="name">${esc(c.r.L.nome)}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag warn">sem espaço p/ crianças</span>':''}${c.r.overCap?` <span class="tag warn">excede ${c.r.L.cap}</span>`:''}<small>${c.r.N} pessoas${c.r.L.cap>0?' · cap. '+c.r.L.cap:''}</small></div>
       <div class="track"><div class="fill ${isBest?'best':''}" style="width:${Math.max(8,c.r.pForm/max*100)}%"></div></div>
       <div class="price">${BRL(c.r.pForm)}</div></div>`;
   }).join('');
 
-  const parts=[
-    {n:'Local',v:r.custoLocal,c:'#2E74B5'},
-    {n:'Combo pipoca',v:r.comboCost,c:'#8E44AD'},
-    {n:'Becas',v:r.becas,c:'#5B9BD5'},
-    {n:'Canudos',v:r.canudos,c:'#8AB6DE'},
-    {n:'Lembranças',v:r.lembr,c:'#2E9E5B'},
-    {n:'Certificados',v:r.certif,c:'#7FC79A'},
-    {n:'Fotografia',v:r.foto,c:'#C77700'},
-    {n:'Refeição equipe',v:r.refColab,c:'#E0A458'},
-    {n:'Outros fixos',v:r.presenteProfs+r.transporte+r.decor,c:'#9AA7B5'},
-  ].filter(p=>p.v>0);
-  const tot=parts.reduce((a,b)=>a+b.v,0);
-  let acc=0;const segsC=parts.map(p=>{const a0=acc/tot*360;acc+=p.v;const a1=acc/tot*360;return `${p.c} ${a0}deg ${a1}deg`;}).join(',');
+  // donut
+  const palette=['#2E74B5','#8E44AD','#5B9BD5','#8AB6DE','#2E9E5B','#7FC79A','#C77700','#E0A458','#9AA7B5','#D98880','#48C9B0','#F4D03F'];
+  let parts=[{n:'Local',v:r.custoLocal,c:'#1F3864'}];
+  if(r.comboCost>0)parts.push({n:'Combo pipoca',v:r.comboCost,c:'#8E44AD'});
+  r.custosDet.forEach((d,i)=>{if(d.total>0)parts.push({n:d.nome,v:d.total,c:palette[i%palette.length]});});
+  const tot=parts.reduce((a,b)=>a+b.v,0)||1;
+  let acc=0;const segsC=parts.map(p=>{const a0=acc/tot*360;acc+=p.v;return `${p.c} ${a0}deg ${acc/tot*360}deg`;}).join(',');
   document.getElementById('donut').innerHTML=`<div style="width:150px;height:150px;border-radius:50%;background:conic-gradient(${segsC});position:relative">
     <div style="position:absolute;inset:26px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center">
     <div style="font-size:10px;color:#6B7787">CUSTO TOTAL</div><div style="font-size:16px;font-weight:800;color:#1F3864">${BRL(tot)}</div></div></div>`;
-  document.getElementById('legend').innerHTML=parts.map(p=>`<div><span class="dot" style="background:${p.c}"></span>${p.n} — <b>${BRL(p.v)}</b> <span style="color:#6B7787">(${Math.round(p.v/tot*100)}%)</span></div>`).join('');
+  document.getElementById('legend').innerHTML=parts.map(p=>`<div><span class="dot" style="background:${p.c}"></span>${esc(p.n)} — <b>${BRL(p.v)}</b> <span style="color:#6B7787">(${Math.round(p.v/tot*100)}%)</span></div>`).join('');
 
+  // financeiro
   document.getElementById('fin').innerHTML=`
     <tr><th>Item</th><th class="r">Valor</th></tr>
     <tr><td>Receita formandos (${r.F} × ${BRL(r.pForm)})</td><td class="r">${BRL(r.pForm*r.F)}</td></tr>
-    <tr><td>Receita convidados extras (${r.nExtras} × ${BRL(r.pExtra)})</td><td class="r">${BRL(r.recExtras)}</td></tr>
+    <tr><td>Receita extras (${r.nExtras} × ${BRL(r.pExtra)})</td><td class="r">${BRL(r.recExtras)}</td></tr>
     <tr class="total"><td class="tot">Receita total</td><td class="r tot">${BRL(r.receita)}</td></tr>
-    <tr><td>Custo total do evento</td><td class="r">− ${BRL(r.custoTotal)}</td></tr>
-    <tr class="total"><td class="tot">Saldo</td><td class="r tot" style="color:${r.saldo>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldo)} <span class="pill ${r.saldo>=0?'ok':'warn'}">${r.saldo>=0?'equilibrado':'déficit'}</span></td></tr>`;
+    <tr><td>Custo total</td><td class="r">− ${BRL(r.custoTotal)}</td></tr>
+    <tr class="total"><td class="tot">Saldo</td><td class="r tot" style="color:${r.saldo>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldo)} <span class="pill ${r.saldo>=0?'ok':'warn'}">${r.saldo>=0?'ok':'déficit'}</span></td></tr>`;
 
-  document.getElementById('detalhe').innerHTML=`
-    <tr><th>Categoria</th><th>Detalhe</th><th class="r">Valor</th><th class="r">/ formando</th></tr>
-    <tr><td>Local</td><td>${r.L.nome} · ${r.N} pessoas</td><td class="r">${BRL(r.custoLocal)}</td><td class="r">${BRL(r.custoLocal/r.F)}</td></tr>
-    ${r.comboCost>0?`<tr><td>🍿 Combo pipoca</td><td>${BRL(S.combo)} × ${r.N}</td><td class="r">${BRL(r.comboCost)}</td><td class="r">${BRL(r.comboCost/r.F)}</td></tr>`:''}
-    <tr><td>Becas (locação)</td><td>R$28 × ${r.F}</td><td class="r">${BRL(r.becas)}</td><td class="r">R$ 28</td></tr>
-    <tr><td>Canudos</td><td>R$22 × ${r.F}</td><td class="r">${BRL(r.canudos)}</td><td class="r">R$ 22</td></tr>
-    <tr><td>Certificados/impressões</td><td>R$6 × ${r.F}</td><td class="r">${BRL(r.certif)}</td><td class="r">R$ 6</td></tr>
-    <tr><td>Lembrança do formando</td><td>${BRL(S.lemb)} × ${r.F}</td><td class="r">${BRL(r.lembr)}</td><td class="r">${BRL(S.lemb)}</td></tr>
-    <tr><td>Fotografia</td><td>a confirmar</td><td class="r">${BRL(r.foto)}</td><td class="r">${BRL(r.foto/r.F)}</td></tr>
-    <tr><td>Refeição equipe</td><td>R$25 × ${r.colab}</td><td class="r">${BRL(r.refColab)}</td><td class="r">${BRL(r.refColab/r.F)}</td></tr>
-    <tr><td>Presente professoras</td><td>fixo</td><td class="r">${BRL(r.presenteProfs)}</td><td class="r">${BRL(r.presenteProfs/r.F)}</td></tr>
-    <tr><td>Transporte</td><td>fixo</td><td class="r">${BRL(r.transporte)}</td><td class="r">${BRL(r.transporte/r.F)}</td></tr>
-    <tr><td>Decoração</td><td>${r.decor?(S.local==='dipal'?'incluso':'extra'):'—'}</td><td class="r">${BRL(r.decor)}</td><td class="r">${BRL(r.decor/r.F)}</td></tr>
-    <tr class="total"><td class="tot">Custo total</td><td></td><td class="r tot">${BRL(r.custoTotal)}</td><td class="r tot">${BRL(r.custoTotal/r.F)}</td></tr>`;
-
+  // insight
   let msg='';
   if(S.turma=='n5'&&S.fmt=='jantar'){
-    if(!r.L.kids) msg=`<b>Atenção:</b> ${r.L.nome} não tem espaço de brincadeira — pouco adequado para o Nível 5. Considere Di Paladare (espaço kids incluso) ou Obiava (parquinho).`;
-    else if(S.local==='dipal') msg=`<b>Di Paladare</b> resolve as dores históricas do Nível 5 num pacote só: espaço kids, jantar no local (sem terceirizar comida), decoração e DJ inclusos. Cabe as duas turmas (5A+5B) juntas em um único dia.`;
-    else msg=`${r.L.nome} atende, mas a decoração fica por conta da escola. Compare com o Di Paladare, que já inclui tudo.`;
-  } else if(S.turma=='n5'&&S.fmt=='cer'){
-    msg=`<b>Opção enxuta do Nível 5:</b> só a cerimônia (~${BRL(r.pForm)}/formando) e as famílias saem para comer depois. Bem mais barato — bom para apresentar como alternativa às famílias que preferem economizar.`;
-  } else if(S.turma=='9a'&&S.fmt=='cer'){
-    msg=`<b>9º ano — só cerimônia (~${BRL(r.pForm)}/formando):</b> opção enxuta que deixa mais orçamento livre para a viagem de fim de ano.`;
-  } else {
-    msg=`<b>9º ano com jantar (~${BRL(r.pForm)}/formando):</b> adolescentes valorizam clima de festa — o Di Paladare já inclui DJ e pista. Lembre que a viagem de fim de ano também pesa no bolso das famílias.`;
-  }
-  if(r.L.cinema) msg=`<b>${r.L.nome} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Alternativa divertida e barata; as famílias podem sair para comer depois. Dá para exibir vídeo/retrospectiva da turma na tela.`;
-  msg+=` <br><br>💡 <b>Elasticidade:</b> com convidado extra a ${BRL(r.pExtra)}, o cenário atual prevê ${r.nExtras} extras. Se o preço sobe, tende a vir menos gente (só os pais); se cai, vêm avós e tios — mova o controle de <i>convidados extras</i> para simular.`;
-  if(r.overCap) msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> o cenário tem ${r.N} pessoas, mas ${r.L.nome} comporta ${r.L.cap}. Reduza convidados, escolha uma sala/local maior (ex.: Cineplus TSX = 405 lugares) ou divida em dois dias.<br><br>`+msg;
+    if(!r.L.kids)msg=`<b>Atenção:</b> ${esc(r.L.nome)} não tem espaço de brincadeira — pouco adequado ao Nível 5. Prefira Di Paladare (espaço kids incluso) ou Obiava (parquinho).`;
+    else if(S.local==='dipal')msg=`<b>Di Paladare</b> resolve as dores do Nível 5 num pacote só: espaço kids, jantar no local, decoração e DJ inclusos. Cabe as duas turmas juntas.`;
+    else msg=`${esc(r.L.nome)} atende, mas a decoração fica por conta da escola.`;
+  }else if(S.turma=='n5'){msg=`<b>Nível 5 — só cerimônia (~${BRL(r.pForm)}/formando):</b> opção enxuta; as famílias saem para comer depois.`;}
+  else if(S.fmt=='cer'){msg=`<b>9º ano — só cerimônia (~${BRL(r.pForm)}/formando):</b> deixa mais orçamento livre para a viagem de fim de ano.`;}
+  else{msg=`<b>9º ano com jantar (~${BRL(r.pForm)}/formando):</b> adolescentes valorizam clima de festa (o Di Paladare inclui DJ). Lembre da viagem de fim de ano.`;}
+  if(r.L.cinema)msg=`<b>${esc(r.L.nome)} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Divertido e barato; dá p/ passar vídeo da turma na tela.`;
+  msg+=` <br><br>💡 <b>Elasticidade:</b> com extra a ${BRL(r.pExtra)}, o cenário prevê ${r.nExtras} extras. Mais convidados diluem os custos fixos e baixam o preço por formando.`;
+  if(r.overCap)msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> ${r.N} pessoas para ${r.L.cap} lugares em ${esc(r.L.nome)}. Reduza convidados, use sala/local maior (ex.: Cineplus TSX 405) ou divida em dois dias.<br><br>`+msg;
   document.getElementById('insight').innerHTML=msg;
 }
 
-fillLocais();render();
+// ================= CENÁRIOS =================
+document.getElementById('btnSaveSc').onclick=()=>{
+  const nm=(document.getElementById('scName').value||'').trim()||`Cenário ${scenarios.length+1}`;
+  scenarios.push({nome:nm, state:JSON.parse(JSON.stringify(S))});
+  document.getElementById('scName').value='';renderScenarios();persist();toast('Cenário salvo: '+nm);
+};
+function renderScenarios(){
+  const list=document.getElementById('scList');
+  list.innerHTML=scenarios.map((s,i)=>{const r=calc(s.state.local,s.state);
+    return `<div class="sc-item"><div><b>${esc(s.nome)}</b><div class="meta">${esc(LOCAIS[s.state.local].nome)} · ${s.state.fmt=='cer'?'só cerimônia':'jantar'} · ${BRL(r.pForm)}/form · ${r.N} pess.</div></div>
+      <div style="display:flex;gap:6px"><button class="mini" data-sc="load" data-i="${i}">abrir</button><button class="mini del" data-sc="del" data-i="${i}">✕</button></div></div>`;
+  }).join('')||'<div class="hint">Nenhum cenário salvo ainda.</div>';
+  // comparativo
+  const wrap=document.getElementById('scCompareWrap');
+  if(scenarios.length){wrap.style.display='block';
+    document.getElementById('scCompare').innerHTML=`<tr><th>Cenário</th><th>Local</th><th>Formato</th><th class="r">Pessoas</th><th class="r">R$/formando</th><th class="r">R$/extra</th><th class="r">Custo total</th><th class="r">Saldo</th></tr>`+
+    scenarios.map(s=>{const r=calc(s.state.local,s.state);return `<tr><td><b>${esc(s.nome)}</b></td><td>${esc(LOCAIS[s.state.local].nome)}</td><td>${s.state.fmt=='cer'?'cerimônia':'jantar'}</td><td class="r">${r.N}</td><td class="r tot">${BRL(r.pForm)}</td><td class="r">${BRL(r.pExtra)}</td><td class="r">${BRL(r.custoTotal)}</td><td class="r" style="color:${r.saldo>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldo)}</td></tr>`;}).join('');
+  }else wrap.style.display='none';
+}
+document.getElementById('scList').addEventListener('click',e=>{
+  const a=e.target.dataset.sc;if(!a)return;const i=+e.target.dataset.i;
+  if(a==='load'){S=JSON.parse(JSON.stringify(scenarios[i].state));syncUI();renderAll();toast('Cenário aberto');}
+  if(a==='del'){scenarios.splice(i,1);renderScenarios();persist();}
+});
+
+// ================= EXPORT / IMPORT / RESET =================
+document.getElementById('btnExport').onclick=()=>{
+  const data={meta:{app:'Dashboard Formaturas 2026',exportadoEm:new Date().toISOString()},
+    atual:{state:S,resultado:resumo(calc(S.local))},
+    cenarios:scenarios.map(s=>({nome:s.nome,state:s.state,resultado:resumo(calc(s.state.local,s.state))}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='formaturas2026_dados_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  toast('Dados exportados (JSON)');
+};
+function resumo(r){return {local:LOCAIS[r.key].nome,formato:r.L.fmt,turma:S.turma,formandos:r.F,pessoas:r.N,convidadosExtras:r.nExtras,
+  precoPorFormando:Math.round(r.pForm),precoEquilibrio:Math.round(r.pFormEq),precoDefinido:r.usaDef?Math.round(r.pForm):null,
+  precoConvidadoExtra:r.pExtra,custoTotal:Math.round(r.custoTotal),
+  receita:Math.round(r.receita),saldo:Math.round(r.saldo),lucroProjetado:r.usaDef?Math.round(r.saldo):null,
+  custos:r.custosDet.map(d=>({item:d.nome,valor:d.valor,tipo:d.tipo,subtotal:Math.round(d.total)})),
+  custoLocal:Math.round(r.custoLocal),comboPipoca:Math.round(r.comboCost)};}
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
+document.getElementById('fileImport').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const d=JSON.parse(rd.result);
+    if(d.atual&&d.atual.state)S=d.atual.state; else if(d.S)S=d.S;
+    if(d.cenarios)scenarios=d.cenarios.map(c=>({nome:c.nome,state:c.state})); else if(d.scenarios)scenarios=d.scenarios;
+    syncUI();renderAll();toast('Dados importados');
+  }catch(err){toast('Arquivo inválido');}};rd.readAsText(f);};
+document.getElementById('btnResetAll').onclick=()=>{if(confirm('Resetar o cenário atual para o padrão? (os cenários salvos são mantidos)')){S=defaultState();syncUI();renderAll();toast('Cenário resetado');}};
+
+// ================= INIT =================
+restore();
+syncUI();
+renderAll();
 </script>
 </body>
 </html>
