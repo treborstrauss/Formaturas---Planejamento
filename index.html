@@ -354,8 +354,9 @@ function calc(key, st){
   const receita=pForm*F+recExtras;
   const saldo=receita-custoTotal;                          // saldo/lucro projetado
   const lucroForm=saldo/F;
-  const overCap=L.cap>0 && N>L.cap;
-  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,pExtraCalc,usaExtraDef,recExtras,receita,saldo,lucroForm,overCap};
+  const seatsUsed=L.cinema?Math.max(0,N-F):N;   // no cinema os formandos ficam em cadeiras à frente
+  const overCap=L.cap>0 && seatsUsed>L.cap;
+  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,pExtraCalc,usaExtraDef,recExtras,receita,saldo,lucroForm,seatsUsed,overCap};
 }
 
 // ================= UI: segments/sliders =================
@@ -477,7 +478,7 @@ function renderResults(){
     const isBest=c.k===best.k,isSel=c.k===S.local;
     const kidsWarn=(S.turma=='n5'&&S.fmt=='jantar'&&!c.r.L.kids);
     return `<div class="bar-row ${isSel?'sel':''}">
-      <div class="name">${esc(c.r.L.nome)}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag warn">sem espaço p/ crianças</span>':''}${c.r.overCap?` <span class="tag warn">excede ${c.r.L.cap}</span>`:''}<small>${c.r.N} pessoas${c.r.L.cap>0?' · cap. '+c.r.L.cap:''}</small></div>
+      <div class="name">${esc(c.r.L.nome)}${isSel?' <span class="tag">selecionado</span>':''}${kidsWarn?' <span class="tag warn">sem espaço p/ crianças</span>':''}${c.r.overCap?` <span class="tag warn">excede ${c.r.L.cap}</span>`:''}<small>${c.r.N} pessoas${c.r.L.cap>0?(c.r.L.cinema?` · ${c.r.seatsUsed} poltronas / ${c.r.L.cap}`:` · cap. ${c.r.L.cap}`):''}</small></div>
       <div class="track"><div class="fill ${isBest?'best':''}" style="width:${Math.max(8,c.r.pForm/max*100)}%"></div></div>
       <div class="price">${BRL(c.r.pForm)}</div></div>`;
   }).join('');
@@ -513,9 +514,9 @@ function renderResults(){
   }else if(S.turma=='n5'){msg=`<b>Nível 5 — só cerimônia (~${BRL(r.pForm)}/formando):</b> opção enxuta; as famílias saem para comer depois.`;}
   else if(S.fmt=='cer'){msg=`<b>9º ano — só cerimônia (~${BRL(r.pForm)}/formando):</b> deixa mais orçamento livre para a viagem de fim de ano.`;}
   else{msg=`<b>9º ano com jantar (~${BRL(r.pForm)}/formando):</b> adolescentes valorizam clima de festa (o Di Paladare inclui DJ). Lembre da viagem de fim de ano.`;}
-  if(r.L.cinema)msg=`<b>${esc(r.L.nome)} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Divertido e barato; dá p/ passar vídeo da turma na tela.`;
+  if(r.L.cinema)msg=`<b>${esc(r.L.nome)} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Os ${r.F} formandos ficam em cadeiras à frente (não ocupam poltronas): ${r.seatsUsed} poltronas usadas de ${r.L.cap}. Dá p/ passar vídeo da turma na tela.`;
   msg+=` <br><br>💡 <b>Elasticidade:</b> com extra a ${BRL(r.pExtra)}, o cenário prevê ${r.nExtras} extras. Mais convidados diluem os custos fixos e baixam o preço por formando.`;
-  if(r.overCap)msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> ${r.N} pessoas para ${r.L.cap} lugares em ${esc(r.L.nome)}. Reduza convidados, use sala/local maior (ex.: Cineplus TSX 405) ou divida em dois dias.<br><br>`+msg;
+  if(r.overCap)msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> ${r.L.cinema?r.seatsUsed+' poltronas necessárias (formandos ficam à frente)':r.N+' pessoas'} para ${r.L.cap} lugares em ${esc(r.L.nome)}. Reduza convidados, use sala/local maior (ex.: Cineplus TSX 405) ou divida em dois dias.<br><br>`+msg;
   document.getElementById('insight').innerHTML=msg;
 }
 
