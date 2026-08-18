@@ -170,13 +170,17 @@
       <div class="hint">Convidados cobertos no valor do formando, <b>sem contar o estudante</b>. Ex.: 2 = pai + mãe (o estudante já entra à parte).</div>
     </div>
     <div class="ctl">
-      <label>Convidados <b>extras</b>/formando</label>
-      <div class="stepper">
-        <button class="stp" data-k="extras" data-d="-1">−</button>
-        <input type="number" id="extras" min="0" step="0.5" value="2">
-        <button class="stp" data-k="extras" data-d="1">+</button>
+      <label>Convidados <b>extras</b></label>
+      <div class="seg" id="segExtraMode">
+        <button data-m="form">Média/formando</button>
+        <button data-m="total">Total liberado</button>
       </div>
-      <div class="hint">Média de convidados extras por formando (aceita decimais, ex.: 2,5). Sem limite — bom para projeções maiores.</div>
+      <div class="stepper" style="margin-top:8px">
+        <button class="stp" data-k="extrasVal" data-d="-1">−</button>
+        <input type="number" id="extrasVal" min="0" value="2">
+        <button class="stp" data-k="extrasVal" data-d="1">+</button>
+      </div>
+      <div class="hint" id="extraHint"></div>
     </div>
     <div class="ctl">
       <label>Colaboradores + professores</label>
@@ -195,6 +199,11 @@
       <label>💵 Preço DEFINIDO por formando (R$)</label>
       <input type="number" id="precoDef" min="0" placeholder="Vazio = usa o cálculo de equilíbrio">
       <div class="hint">Se você já definiu o valor da cobrança, digite aqui: o painel passa a projetar o <b>lucro</b> com base nele. O preço de equilíbrio continua aparecendo como referência.</div>
+    </div>
+    <div class="ctl" style="background:var(--light);padding:12px;border-radius:10px;margin-top:4px">
+      <label>👥 Preço DEFINIDO por convidado extra (R$)</label>
+      <input type="number" id="pExtraDef" min="0" placeholder="Vazio = usa o valor sugerido">
+      <div class="hint">Se já definiu quanto cobra por convidado extra, digite aqui. Isso entra na receita e ajusta o preço/saldo. O valor sugerido continua como referência.</div>
     </div>
    </div>
 
@@ -215,7 +224,7 @@
     <div class="kpis">
       <div class="kpi accent"><div class="lbl">PREÇO POR FORMANDO</div><div class="num" id="kForm">—</div><div class="sub" id="kFormSub"></div></div>
       <div class="kpi"><div class="lbl">CUSTO POR FORMANDO</div><div class="num" id="kCusto">—</div><div class="sub">sobre o custo real</div></div>
-      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub">valor sugerido/pessoa</div></div>
+      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub" id="kExtraSub">valor sugerido/pessoa</div></div>
       <div class="kpi"><div class="lbl">TOTAL DE PESSOAS</div><div class="num" id="kPpl">—</div><div class="sub" id="kPplSub"></div></div>
       <div class="kpi hi"><div class="lbl" id="kSaldoLbl">SALDO PROJETADO</div><div class="num" id="kSaldo">—</div><div class="sub" id="kSaldoSub"></div></div>
     </div>
@@ -307,7 +316,7 @@ function defaultCustos(){return [
 function normalizeCustos(st){if(!st||!st.custos)return;st.custos=st.custos.map(c=>('custo'in c)
   ?{nome:c.nome,tipo:c.tipo,custo:+c.custo||0,cobrado:(c.cobrado==null||c.cobrado==='')?(+c.custo||0):(+c.cobrado||0)}
   :{nome:c.nome,tipo:c.tipo,custo:+c.valor||0,cobrado:+c.valor||0});}
-function defaultState(){return {turma:'n5',fmt:'cer',local:'fep',formandos:22,inclusos:2,extras:2,colab:20,marg:10,combo:0,venueManual:false,venueValor:0,precoDef:0,custos:defaultCustos()};}
+function defaultState(){return {turma:'n5',fmt:'cer',local:'fep',formandos:22,inclusos:2,extras:2,extrasMode:'form',extrasTotal:40,colab:20,marg:10,combo:0,venueManual:false,venueValor:0,precoDef:0,pExtraDef:0,custos:defaultCustos()};}
 let S = defaultState();
 let scenarios = [];
 const LS='formaturas2026';
@@ -319,8 +328,8 @@ function itemMult(tipo,ctx){return tipo==='formando'?ctx.F:tipo==='pessoa'?ctx.N
 function calc(key, st){
   st=st||S;
   const L=LOCAIS[key];
-  const F=st.formandos, incl=st.inclusos, ex=st.extras, colab=st.colab;
-  const nExtras=Math.round(F*ex);
+  const F=st.formandos, incl=st.inclusos, colab=st.colab;
+  const nExtras = st.extrasMode==='total' ? Math.round(+st.extrasTotal||0) : Math.round((+st.extras||0)*F);
   const N=F + F*incl + nExtras + colab;
   const custoLocal=(st.venueManual && key===st.local)?(+st.venueValor||0):L.custo(N);
   const comboOn = L.cinema && st.combo>0;
@@ -333,7 +342,9 @@ function calc(key, st){
   const custoTotal=custoLocal+comboCost+custosSum;
   const margFrac=st.marg/100;
   const baseMarg = comboOn ? st.combo : L.marg(N);
-  const pExtra=Math.ceil((baseMarg*(1+margFrac))/5)*5;
+  const pExtraCalc=Math.ceil((baseMarg*(1+margFrac))/5)*5;
+  const usaExtraDef=(+st.pExtraDef||0)>0;
+  const pExtra=usaExtraDef?(+st.pExtraDef):pExtraCalc;
   const recExtras=nExtras*pExtra;
   const alvo=custoTotal*(1+margFrac);
   const pFormEq=Math.max(0,(alvo-recExtras)/F);            // preço p/ cobrir custos + reserva
@@ -344,7 +355,7 @@ function calc(key, st){
   const saldo=receita-custoTotal;                          // saldo/lucro projetado
   const lucroForm=saldo/F;
   const overCap=L.cap>0 && N>L.cap;
-  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,recExtras,receita,saldo,lucroForm,overCap};
+  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,pExtraCalc,usaExtraDef,recExtras,receita,saldo,lucroForm,overCap};
 }
 
 // ================= UI: segments/sliders =================
@@ -358,12 +369,24 @@ function bindSlider(id,key){const el=document.getElementById(id);el.oninput=()=>
 ['marg'].forEach(k=>bindSlider(k,k));
 function refresh(){updateAmounts();renderResults();renderScenarios();persist();}
 function bindNum(id,key,min){min=min||0;const el=document.getElementById(id);el.oninput=()=>{let v=parseFloat(el.value);if(isNaN(v)||v<min)v=min;S[key]=v;refresh();};}
-bindNum('inclusos','inclusos');bindNum('extras','extras');bindNum('formandos','formandos',1);bindNum('colab','colab');
-document.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;const inp=document.getElementById(k);const mn=+(inp.min||0);let v=(+S[k]||0)+d;if(v<mn)v=mn;S[k]=v;inp.value=v;refresh();});
+bindNum('inclusos','inclusos');bindNum('formandos','formandos',1);bindNum('colab','colab');
+// convidados extras: modo média/formando ou total liberado
+function extraVal(){return S.extrasMode==='total'?(+S.extrasTotal||0):(+S.extras||0);}
+function setExtraVal(v){if(S.extrasMode==='total')S.extrasTotal=v;else S.extras=v;}
+function syncExtra(){setSeg('segExtraMode','data-m',S.extrasMode||'form');const inp=document.getElementById('extrasVal');inp.step=S.extrasMode==='total'?'1':'0.5';inp.value=extraVal();
+  document.getElementById('extraHint').innerHTML=S.extrasMode==='total'
+    ?'Quantidade <b>total</b> de convidados extras liberada (pool). Os estudantes garantem por ordem de reserva.'
+    :'Média de convidados extras <b>por formando</b> (aceita decimais, ex.: 2,5).';}
+seg('segExtraMode','data-m',v=>{S.extrasMode=v;syncExtra();refresh();});
+document.getElementById('extrasVal').oninput=()=>{let v=parseFloat(document.getElementById('extrasVal').value);if(isNaN(v)||v<0)v=0;setExtraVal(v);refresh();};
+document.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;
+  if(k==='extrasVal'){let v=extraVal()+d;if(v<0)v=0;setExtraVal(v);document.getElementById('extrasVal').value=v;refresh();return;}
+  const inp=document.getElementById(k);const mn=+(inp.min||0);let v=(+S[k]||0)+d;if(v<mn)v=mn;S[k]=v;inp.value=v;refresh();});
 document.getElementById('local').onchange=e=>{S.local=e.target.value;syncUI();renderAll();};
 document.getElementById('venueManual').onchange=e=>{S.venueManual=e.target.checked;document.getElementById('venueValor').style.display=e.target.checked?'block':'none';renderAll();};
 document.getElementById('venueValor').oninput=e=>{S.venueValor=+e.target.value||0;renderAll();};
 document.getElementById('precoDef').oninput=e=>{S.precoDef=+e.target.value||0;renderResults();persist();};
+document.getElementById('pExtraDef').oninput=e=>{S.pExtraDef=+e.target.value||0;renderResults();persist();};
 
 function eligible(key){return LOCAIS[key].fmt===S.fmt;}
 function firstEligible(){return Object.keys(LOCAIS).find(eligible);}
@@ -376,19 +399,22 @@ function syncLabels(){
   document.getElementById('vMarg').textContent=S.marg+'%';
 }
 function syncUI(){
+  if(!S.extrasMode)S.extrasMode='form';
+  if(S.extrasTotal==null)S.extrasTotal=Math.round((+S.extras||0)*(+S.formandos||0))||40;
   setSeg('segTurma','data-turma',S.turma);
   setSeg('segFormato','data-fmt',S.fmt);
   setSeg('segCombo','data-combo',S.combo);
   fillLocais();
   document.getElementById('formandos').value=S.formandos;
   document.getElementById('inclusos').value=S.inclusos;
-  document.getElementById('extras').value=S.extras;
+  syncExtra();
   document.getElementById('colab').value=S.colab;
   document.getElementById('marg').value=S.marg;
   document.getElementById('venueManual').checked=S.venueManual;
   document.getElementById('venueValor').style.display=S.venueManual?'block':'none';
   document.getElementById('venueValor').value=S.venueValor||'';
   document.getElementById('precoDef').value=S.precoDef||'';
+  document.getElementById('pExtraDef').value=S.pExtraDef||'';
   document.getElementById('fmtHint').textContent = S.fmt=='cer'?'Só a colação. Famílias saem para comer depois → mais barato.':'Cerimônia seguida de jantar/festa no mesmo local.';
   syncLabels();
   buildCustos();
@@ -435,6 +461,7 @@ function renderResults(){
   document.getElementById('kFormSub').textContent=r.usaDef?`definido · sugerido ${BRL(r.pFormSug)}`:(r.markupItens!==0?`sugerido · equilíbrio ${BRL(r.pFormEq)}`:(S.marg>0?`equilíbrio · ${S.marg}% reserva`:'no equilíbrio'));
   document.getElementById('kCusto').textContent=BRL(r.custoTotal/r.F);
   document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
+  document.getElementById('kExtraSub').textContent=r.usaExtraDef?`definido · sugerido ${BRL(r.pExtraCalc)}`:'valor sugerido/pessoa';
   document.getElementById('kPpl').textContent=r.N;
   document.getElementById('kPplSub').textContent=`${r.F} form. + ${r.F*r.incl} inclusos + ${r.nExtras} extras + ${r.colab} equipe`;
   document.getElementById('kSaldoLbl').textContent=r.usaDef?'LUCRO PROJETADO':'SALDO PROJETADO';
@@ -527,9 +554,9 @@ document.getElementById('btnExport').onclick=()=>{
   a.download='formaturas2026_dados_'+new Date().toISOString().slice(0,10)+'.json';a.click();
   toast('Dados exportados (JSON)');
 };
-function resumo(r){return {local:LOCAIS[r.key].nome,formato:r.L.fmt,turma:S.turma,formandos:r.F,pessoas:r.N,convidadosExtras:r.nExtras,
+function resumo(r){return {local:LOCAIS[r.key].nome,formato:r.L.fmt,turma:S.turma,formandos:r.F,pessoas:r.N,convidadosExtras:r.nExtras,modoConvidadosExtras:S.extrasMode==='total'?'total liberado':'média por formando',
   precoPorFormando:Math.round(r.pForm),precoEquilibrio:Math.round(r.pFormEq),precoSugerido:Math.round(r.pFormSug),precoDefinido:r.usaDef?Math.round(r.pForm):null,
-  precoConvidadoExtra:r.pExtra,custoTotal:Math.round(r.custoTotal),margemItens:Math.round(r.markupItens),
+  precoConvidadoExtra:r.pExtra,precoConvidadoExtraSugerido:r.pExtraCalc,precoConvidadoExtraDefinido:r.usaExtraDef?r.pExtra:null,custoPorFormando:Math.round(r.custoTotal/r.F),custoTotal:Math.round(r.custoTotal),margemItens:Math.round(r.markupItens),
   receita:Math.round(r.receita),saldo:Math.round(r.saldo),lucroProjetado:r.usaDef?Math.round(r.saldo):null,
   custos:r.custosDet.map(d=>({item:d.nome,tipo:d.tipo,custoUnit:d.custo,cobradoUnit:d.cobrado,custoSubtotal:Math.round(d.totalCusto),cobradoSubtotal:Math.round(d.totalCobrado),margem:Math.round(d.margem)})),
   custoLocal:Math.round(r.custoLocal),comboPipoca:Math.round(r.comboCost)};}
