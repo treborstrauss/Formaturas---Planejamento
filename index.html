@@ -334,33 +334,47 @@ function calc(key, st){
   const L=LOCAIS[key];
   const F=st.formandos, incl=st.inclusos, colab=st.colab;
   const nExtras = st.extrasMode==='total' ? Math.round(+st.extrasTotal||0) : Math.round((+st.extras||0)*F);
-  const N=F + F*incl + nExtras + colab;
-  const custoLocal=(st.venueManual && key===st.local)?(+st.venueValor||0):L.custo(N);
+  const nBase = F + F*incl + colab;         // heads GARANTIDOS (formandos + inclusos + equipe), sem extras
+  const nFull = nBase + nExtras;            // cenário com extras projetados
+  const venueBase=(st.venueManual&&key===st.local)?(+st.venueValor||0):L.custo(nBase);
+  const venueFull=(st.venueManual&&key===st.local)?(+st.venueValor||0):L.custo(nFull);
   const comboOn = L.cinema && st.combo>0;
-  const comboCost = comboOn ? st.combo*N : 0;
-  const ctx={F,N,colab};
+  const comboBase = comboOn?st.combo*nBase:0;
+  const comboFull = comboOn?st.combo*nFull:0;
+  const mmult=(tipo,Np)=>tipo==='formando'?F:tipo==='pessoa'?Np:tipo==='colaborador'?colab:1;
   const custosDet=(st.custos||[]).map(c=>{const custo=+c.custo||0,cobrado=(c.cobrado==null||c.cobrado==='')?custo:(+c.cobrado||0);
-    const mult=itemMult(c.tipo,ctx);return {nome:c.nome,tipo:c.tipo,custo,cobrado,mult,totalCusto:custo*mult,totalCobrado:cobrado*mult,margem:(cobrado-custo)*mult};});
-  const custosSum=custosDet.reduce((a,b)=>a+b.totalCusto,0);   // custo dos itens
-  const markupItens=custosDet.reduce((a,b)=>a+b.margem,0);     // margem cobrada acima do custo
-  const custoTotal=custoLocal+comboCost+custosSum;
+    const mB=mmult(c.tipo,nBase),mF=mmult(c.tipo,nFull);
+    return {nome:c.nome,tipo:c.tipo,custo,cobrado,mult:mB,totalCusto:custo*mB,totalCobrado:cobrado*mB,margem:(cobrado-custo)*mB,totalCustoFull:custo*mF};});
+  const custosSum=custosDet.reduce((a,b)=>a+b.totalCusto,0);        // itens (garantido)
+  const custosSumFull=custosDet.reduce((a,b)=>a+b.totalCustoFull,0);
+  const markupItens=custosDet.reduce((a,b)=>a+b.margem,0);         // margem cobrada acima do custo (garantido)
+  const custoBase=venueBase+comboBase+custosSum;                   // custo do evento garantido
+  const custoFull=venueFull+comboFull+custosSumFull;              // custo se os extras vierem
+  const custoExtras=custoFull-custoBase;                           // custo adicional trazido pelos extras
   const margFrac=st.marg/100;
-  const baseMarg = comboOn ? st.combo : L.marg(N);
+  const baseMarg = comboOn ? st.combo : L.marg(nFull);
   const pExtraCalc=Math.ceil((baseMarg*(1+margFrac))/5)*5;
   const usaExtraDef=(+st.pExtraDef||0)>0;
   const pExtra=usaExtraDef?(+st.pExtraDef):pExtraCalc;
-  const recExtras=nExtras*pExtra;
-  const alvo=custoTotal*(1+margFrac);
-  const pFormEq=Math.max(0,(alvo-recExtras)/F);            // preço p/ cobrir custos + reserva
-  const pFormSug=pFormEq + markupItens/F;                  // + margem cobrada nos itens
+  // preço por formando cobre o evento GARANTIDO (sem contar extras) + reserva + margem de itens
+  const alvoBase=custoBase*(1+margFrac);
+  const pFormEq=Math.max(0,alvoBase/F);
+  const pFormSug=pFormEq + markupItens/F;
   const usaDef=(+st.precoDef||0)>0;
-  const pForm=usaDef?(+st.precoDef):pFormSug;              // preço usado na projeção
-  const receita=pForm*F+recExtras;
-  const saldo=receita-custoTotal;                          // saldo/lucro projetado
-  const lucroForm=saldo/F;
+  const pForm=usaDef?(+st.precoDef):pFormSug;
+  const receitaBase=pForm*F;
+  const saldoBase=receitaBase-custoBase;                          // saldo GARANTIDO (extras não vêm)
+  const recExtras=nExtras*pExtra;
+  const lucroExtras=recExtras-custoExtras;                        // lucro adicional se os extras vierem
+  const receitaFull=receitaBase+recExtras;
+  const saldoFull=receitaFull-custoFull;                          // saldo com extras
+  const lucroForm=saldoBase/F;
+  const N=nFull;
   const seatsUsed=L.cinema?Math.max(0,N-F):N;   // no cinema os formandos ficam em cadeiras à frente
   const overCap=L.cap>0 && seatsUsed>L.cap;
-  return {L,key,F,incl,nExtras,N,colab,custoLocal,comboOn,comboCost,custosDet,custosSum,markupItens,custoTotal,pForm,pFormEq,pFormSug,usaDef,pExtra,pExtraCalc,usaExtraDef,recExtras,receita,saldo,lucroForm,seatsUsed,overCap};
+  return {L,key,F,incl,nExtras,N,nBase,nFull,colab,custoLocal:venueBase,comboOn,comboCost:comboBase,custosDet,custosSum,markupItens,
+    custoBase,custoFull,custoExtras,custoTotal:custoBase,pForm,pFormEq,pFormSug,usaDef,pExtra,pExtraCalc,usaExtraDef,recExtras,
+    receitaBase,saldoBase,receitaFull,saldoFull,lucroExtras,receita:receitaBase,saldo:saldoBase,lucroForm,seatsUsed,overCap};
 }
 
 // ================= UI: segments/sliders =================
@@ -469,10 +483,10 @@ function renderResults(){
   document.getElementById('kExtraSub').textContent=r.usaExtraDef?`definido · sugerido ${BRL(r.pExtraCalc)}`:'valor sugerido/pessoa';
   document.getElementById('kPpl').textContent=r.N;
   document.getElementById('kPplSub').textContent=`${r.F} form. + ${r.F*r.incl} inclusos + ${r.nExtras} extras + ${r.colab} equipe`;
-  document.getElementById('kSaldoLbl').textContent=r.usaDef?'LUCRO PROJETADO':'SALDO PROJETADO';
-  document.getElementById('kSaldo').textContent=BRL(r.saldo);
-  document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldo>=0);
-  document.getElementById('kSaldoSub').textContent=r.usaDef?(r.saldo>=0?`+${BRL(r.lucroForm)}/formando`:`${BRL(r.lucroForm)}/formando (prejuízo)`):(r.saldo>=0?'sobra sobre o custo':'FALTA cobrir');
+  document.getElementById('kSaldoLbl').textContent=r.usaDef?'LUCRO GARANTIDO':'SALDO GARANTIDO';
+  document.getElementById('kSaldo').textContent=BRL(r.saldoBase);
+  document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldoBase>=0);
+  document.getElementById('kSaldoSub').textContent=r.nExtras>0?`+${BRL(r.lucroExtras)} se vierem ${r.nExtras} extras`:(r.saldoBase>=0?'sobra sobre o custo':'FALTA cobrir');
 
   // barras
   const cand=Object.keys(LOCAIS).filter(eligible).map(k=>({k,r:calc(k)}));
@@ -502,12 +516,15 @@ function renderResults(){
   // financeiro
   document.getElementById('fin').innerHTML=`
     <tr><th>Item</th><th class="r">Valor</th></tr>
-    <tr><td>Receita formandos (${r.F} × ${BRL(r.pForm)})</td><td class="r">${BRL(r.pForm*r.F)}</td></tr>
+    <tr><td>Receita formandos (${r.F} × ${BRL(r.pForm)})</td><td class="r">${BRL(r.receitaBase)}</td></tr>
     ${r.markupItens!==0?`<tr><td style="color:#6B7787">↳ inclui margem de itens (cobrado − custo)</td><td class="r" style="color:${r.markupItens>=0?'#2E9E5B':'#C0392B'}">${BRL(r.markupItens)}</td></tr>`:''}
-    <tr><td>Receita extras (${r.nExtras} × ${BRL(r.pExtra)})</td><td class="r">${BRL(r.recExtras)}</td></tr>
-    <tr class="total"><td class="tot">Receita total</td><td class="r tot">${BRL(r.receita)}</td></tr>
-    <tr><td>Custo total</td><td class="r">− ${BRL(r.custoTotal)}</td></tr>
-    <tr class="total"><td class="tot">Saldo</td><td class="r tot" style="color:${r.saldo>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldo)} <span class="pill ${r.saldo>=0?'ok':'warn'}">${r.saldo>=0?'ok':'déficit'}</span></td></tr>`;
+    <tr><td>Custo do evento — garantido (sem extras)</td><td class="r">− ${BRL(r.custoBase)}</td></tr>
+    <tr class="total"><td class="tot">Saldo garantido</td><td class="r tot" style="color:${r.saldoBase>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldoBase)} <span class="pill ${r.saldoBase>=0?'ok':'warn'}">${r.saldoBase>=0?'ok':'déficit'}</span></td></tr>
+    ${r.nExtras>0?`<tr><td colspan="2" style="padding-top:13px;color:#6B7787;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:none">Se os ${r.nExtras} convidados extras vierem (bônus)</td></tr>
+    <tr><td>Receita dos extras (${r.nExtras} × ${BRL(r.pExtra)})</td><td class="r">+ ${BRL(r.recExtras)}</td></tr>
+    <tr><td>Custo adicional dos extras</td><td class="r">− ${BRL(r.custoExtras)}</td></tr>
+    <tr><td>Lucro adicional</td><td class="r" style="color:${r.lucroExtras>=0?'#2E9E5B':'#C0392B'}">${BRL(r.lucroExtras)}</td></tr>
+    <tr class="total"><td class="tot">Saldo com extras</td><td class="r tot" style="color:${r.saldoFull>=0?'#2E9E5B':'#C0392B'}">${BRL(r.saldoFull)}</td></tr>`:''}`;
 
   // insight
   let msg='';
@@ -519,7 +536,7 @@ function renderResults(){
   else if(S.fmt=='cer'){msg=`<b>9º ano — só cerimônia (~${BRL(r.pForm)}/formando):</b> deixa mais orçamento livre para a viagem de fim de ano.`;}
   else{msg=`<b>9º ano com jantar (~${BRL(r.pForm)}/formando):</b> adolescentes valorizam clima de festa (o Di Paladare inclui DJ). Lembre da viagem de fim de ano.`;}
   if(r.L.cinema)msg=`<b>${esc(r.L.nome)} (cinema):</b> colação numa sala de cinema${r.comboOn?` com combo de pipoca (${BRL(S.combo)}/pessoa)`:''} — ~${BRL(r.pForm)}/formando. Os ${r.F} formandos ficam em cadeiras à frente (não ocupam poltronas): ${r.seatsUsed} poltronas usadas de ${r.L.cap}. Dá p/ passar vídeo da turma na tela.`;
-  msg+=` <br><br>💡 <b>Elasticidade:</b> com extra a ${BRL(r.pExtra)}, o cenário prevê ${r.nExtras} extras. Mais convidados diluem os custos fixos e baixam o preço por formando.`;
+  msg+=` <br><br>💡 <b>Orçamento conservador:</b> o preço por formando cobre o evento mesmo que <b>nenhum</b> convidado extra venha. Cada extra que aparecer (a ${BRL(r.pExtra)}) é lucro adicional — no cenário atual, +${BRL(r.lucroExtras)} se vierem os ${r.nExtras}.`;
   if(r.overCap)msg=`<b style="color:#C0392B">⚠ Capacidade excedida:</b> ${r.L.cinema?r.seatsUsed+' poltronas necessárias (formandos ficam à frente)':r.N+' pessoas'} para ${r.L.cap} lugares em ${esc(r.L.nome)}. Reduza convidados, use sala/local maior (ex.: Cineplus TSX 405) ou divida em dois dias.<br><br>`+msg;
   document.getElementById('insight').innerHTML=msg;
 }
@@ -561,8 +578,10 @@ document.getElementById('btnExport').onclick=()=>{
 };
 function resumo(r){return {local:LOCAIS[r.key].nome,formato:r.L.fmt,turma:S.turma,formandos:r.F,pessoas:r.N,convidadosExtras:r.nExtras,modoConvidadosExtras:S.extrasMode==='total'?'total liberado':'média por formando',
   precoPorFormando:Math.round(r.pForm),precoEquilibrio:Math.round(r.pFormEq),precoSugerido:Math.round(r.pFormSug),precoDefinido:r.usaDef?Math.round(r.pForm):null,
-  precoConvidadoExtra:r.pExtra,precoConvidadoExtraSugerido:r.pExtraCalc,precoConvidadoExtraDefinido:r.usaExtraDef?r.pExtra:null,custoPorFormando:Math.round(r.custoTotal/r.F),custoTotal:Math.round(r.custoTotal),margemItens:Math.round(r.markupItens),
-  receita:Math.round(r.receita),saldo:Math.round(r.saldo),lucroProjetado:r.usaDef?Math.round(r.saldo):null,
+  precoConvidadoExtra:r.pExtra,precoConvidadoExtraSugerido:r.pExtraCalc,precoConvidadoExtraDefinido:r.usaExtraDef?r.pExtra:null,
+  pessoasGarantidas:r.nBase,pessoasComExtras:r.nFull,custoPorFormando:Math.round(r.custoBase/r.F),
+  custoGarantido:Math.round(r.custoBase),custoComExtras:Math.round(r.custoFull),custoAdicionalExtras:Math.round(r.custoExtras),margemItens:Math.round(r.markupItens),
+  receitaFormandos:Math.round(r.receitaBase),saldoGarantido:Math.round(r.saldoBase),lucroSeVieremExtras:Math.round(r.lucroExtras),saldoComExtras:Math.round(r.saldoFull),
   custos:r.custosDet.map(d=>({item:d.nome,tipo:d.tipo,custoUnit:d.custo,cobradoUnit:d.cobrado,custoSubtotal:Math.round(d.totalCusto),cobradoSubtotal:Math.round(d.totalCobrado),margem:Math.round(d.margem)})),
   custoLocal:Math.round(r.custoLocal),comboPipoca:Math.round(r.comboCost)};}
 document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
