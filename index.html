@@ -284,6 +284,8 @@ const BRL = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function interp(pts,N){N=Math.max(N,pts[0][0]);for(let i=0;i<pts.length-1;i++){const[x0,y0]=pts[i],[x1,y1]=pts[i+1];if(N<=x1)return y0+(y1-y0)*(N-x0)/(x1-x0);}return pts[pts.length-1][1];}
 const dpP1=[[80,14280],[100,15640],[120,16620],[140,18000],[160,19384],[180,21980],[200,23690],[220,25150],[250,27340]];
+// Vougue: pacote fechado por faixa (até 80 / até 100); acima de 100 extrapola pela inclinação
+function vg(p80,p100,N){if(N<=80)return p80;if(N<=100)return p100;return p100+((p100-p80)/20)*(N-100);}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 
 // ================= LOCAIS =================
@@ -294,9 +296,11 @@ const LOCAIS = {
   jardim:   {nome:'Espaço Jardim', fmt:'cer', kids:true, cap:80, custo:N=>1550, marg:()=>0, obs:'Até 80 pessoas. Piscina/ping-pong, mas é "faça você mesmo".'},
   bomjesus: {nome:'Colégio Bom Jesus', fmt:'cer', kids:false, cap:0, custo:N=>4800, marg:()=>0, obs:'Espaço de cerimônia maior.'},
   bourbon:  {nome:'Bourbon', fmt:'cer', kids:false, cap:0, custo:N=>8140, marg:()=>0, obs:'Opção mais sofisticada para cerimônia.'},
+  vougue_cer:{nome:'Vougue — Só colação', fmt:'cer', kids:true, cap:0, custo:N=>vg(10990,13990,N), marg:N=>vg(10990,13990,N)/N, obs:'Vougue Festas & Eventos. Pacote fechado: até 80 = R$10.990 · até 100 = R$13.990. Inclui decoração, som, equipe e espaço kids c/ monitor. Acima de 100, confirmar pacote.'},
   calu:   {nome:'Calu', fmt:'jantar', kids:false, cap:200, custo:N=>5070+72.5*N, marg:()=>72.5, obs:'Mais barato com jantar. Música e decoração por conta da escola. Sem espaço p/ crianças.'},
   obiava: {nome:'Obiava', fmt:'jantar', kids:true, cap:500, custo:N=>6500+85*N+500, marg:()=>85, obs:'Buffet + serviços. Tem parquinho (R$500, 1 monitora). Decoração à parte.'},
   dipal:  {nome:'Di Paladare', fmt:'jantar', kids:true, cap:300, custo:N=>interp(dpP1,N), marg:N=>interp(dpP1,N)/N, obs:'Tudo incluso: espaço kids, jantar, decoração, DJ e TVs. Mínimo 80 pessoas.'},
+  vougue_jan:{nome:'Vougue — Colação + jantar', fmt:'jantar', kids:true, cap:0, custo:N=>vg(15990,19900,N), marg:N=>vg(15990,19900,N)/N, obs:'Vougue: pacote fechado até 80 = R$15.990 · até 100 = R$19.900. Inclui jantar buffet, decoração completa, bar não alcoólico, som e espaço kids c/ monitor. Acima de 100, confirmar.'},
 };
 const TIPOS=[{v:'formando',l:'× formando'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'valor fixo'}];
 
