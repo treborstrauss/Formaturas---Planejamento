@@ -14,6 +14,7 @@
   body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding-bottom:60px}
   header{background:linear-gradient(120deg,var(--navy),var(--blue));color:#fff;padding:20px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
   header h1{font-size:21px;font-weight:700}header p{opacity:.9;font-size:13px;margin-top:3px}
+  .topbtns{display:flex;gap:8px;flex-wrap:wrap}
   .btn{padding:8px 13px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer}
   .btn:hover{background:rgba(255,255,255,.24)}
   .wrap{max-width:1300px;margin:0 auto;padding:0 18px}
@@ -24,7 +25,7 @@
   .ctl{margin-bottom:15px}
   .ctl label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
   .ctl .val{float:right;color:var(--blue);font-weight:700}
-  select,input[type=number]{width:100%;padding:9px 10px;border:1px solid var(--line2);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
+  select,input[type=number],input[type=text]{width:100%;padding:9px 10px;border:1px solid var(--line2);border-radius:9px;font-size:14px;background:#fff;color:var(--ink)}
   input[type=range]{width:100%;accent-color:var(--blue);height:22px}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
   .seg button{flex:1;min-width:0;padding:9px 6px;border:1px solid var(--line2);background:#fff;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--muted)}
@@ -35,12 +36,13 @@
   .stepper .stp:first-child{border-radius:9px 0 0 9px}.stepper .stp:last-child{border-radius:0 9px 9px 0}
   .stepper input{flex:1;min-width:0;width:auto;border-radius:0;border-left:none;border-right:none;text-align:center;font-weight:700;font-size:14px;padding:7px 2px}
   .two{display:flex;gap:10px}.two .stepper{max-width:none;flex:1}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .row2{display:flex;gap:8px;align-items:center}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
   @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
   .kpi{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px}
   .kpi .lbl{font-size:12px;color:var(--muted);font-weight:600}
-  .kpi .num{font-size:25px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.1}
-  .kpi .sub{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .kpi .num{font-size:24px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.1}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:3px}
   .kpi.accent{background:var(--navy)}.kpi.accent .lbl,.kpi.accent .sub{color:#cdd9ea}.kpi.accent .num{color:#fff}
   .kpi.hi{background:var(--greensoft);border-color:#BFE0CC}.kpi.hi .num{color:var(--green)}
   .section{margin-top:18px}
@@ -71,13 +73,25 @@
   .cmp .box .t{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
   .cmp .box .v{font-size:26px;font-weight:800;color:var(--navy);margin-top:3px}
   .cmp .box .d{font-size:12px;color:var(--muted);margin-top:2px}
+  .donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .legend{font-size:12.5px}.legend div{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .dot{width:12px;height:12px;border-radius:3px;flex:none}
+  .sc-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;font-size:13px}
+  .sc-item .meta{color:var(--muted);font-size:11.5px}
   .foot{font-size:11.5px;color:var(--muted);margin-top:20px;text-align:center;line-height:1.5}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:99}
+  .toast.show{opacity:1}
 </style>
 </head>
 <body>
 <header>
   <div><h1>🦅 Formatura Nível 5 · 2026 — Renovação Kids</h1><p>Simulador de custos · Educação Infantil · 22 crianças (5A + 5B)</p></div>
-  <button class="btn" id="btnExport">⬇️ Exportar dados</button>
+  <div class="topbtns">
+    <button class="btn" id="btnExport">⬇️ Exportar</button>
+    <button class="btn" id="btnImport">⬆️ Importar</button>
+    <button class="btn" id="btnResetAll">↺ Resetar</button>
+    <input type="file" id="fileImport" accept="application/json" style="display:none">
+  </div>
 </header>
 
 <div class="wrap"><div class="grid">
@@ -89,10 +103,7 @@
 
       <div class="ctl">
         <label>Formato</label>
-        <div class="seg" id="segFmt">
-          <button data-f="cer">Só cerimônia</button>
-          <button data-f="festa">Comida + brinquedos</button>
-        </div>
+        <div class="seg" id="segFmt"><button data-f="cer">Só cerimônia</button><button data-f="festa">Comida + brinquedos</button></div>
         <div class="hint" id="fmtHint"></div>
       </div>
 
@@ -104,9 +115,7 @@
 
       <div class="ctl" id="starCtl" style="display:none">
         <label>Pacote Star Happy</label>
-        <div class="seg" id="segStar">
-          <button data-p="3">3★</button><button data-p="4" class="on">4★</button><button data-p="5">5★</button><button data-p="6">6★</button>
-        </div>
+        <div class="seg" id="segStar"><button data-p="3">3★</button><button data-p="4" class="on">4★</button><button data-p="5">5★</button><button data-p="6">6★</button></div>
       </div>
 
       <div class="ctl" id="comboCtl" style="display:none">
@@ -116,10 +125,7 @@
 
       <div class="ctl">
         <label>Formato do evento</label>
-        <div class="seg" id="segModo">
-          <button data-m="unico" class="on">Evento único (22)</button>
-          <button data-m="dois">Dois eventos</button>
-        </div>
+        <div class="seg" id="segModo"><button data-m="unico" class="on">Evento único (22)</button><button data-m="dois">Dois eventos</button></div>
         <div class="hint">No modo "dois eventos", o custo total é somado e <b>dividido igualmente pelas 22 crianças</b>.</div>
       </div>
 
@@ -137,10 +143,14 @@
         <label>Convidados <b>inclusos</b>/criança (além da criança)</label>
         <div class="stepper"><button class="stp" data-k="inclusos" data-d="-1">−</button><input type="number" id="inclusos" min="0" value="4"><button class="stp" data-k="inclusos" data-d="1">+</button></div>
       </div>
+
       <div class="ctl">
-        <label>Convidados <b>extras</b>/criança</label>
-        <div class="stepper"><button class="stp" data-k="extras" data-d="-1">−</button><input type="number" id="extras" min="0" step="0.5" value="0"><button class="stp" data-k="extras" data-d="1">+</button></div>
+        <label>Convidados <b>extras</b></label>
+        <div class="seg" id="segExtraMode"><button data-m="form">Média/criança</button><button data-m="total">Total liberado</button></div>
+        <div class="stepper" style="margin-top:8px"><button class="stp" data-k="extrasVal" data-d="-1">−</button><input type="number" id="extrasVal" min="0" value="0"><button class="stp" data-k="extrasVal" data-d="1">+</button></div>
+        <div class="hint" id="extraHint"></div>
       </div>
+
       <div class="ctl">
         <label>Colaboradores + professores <span class="val" id="vColab">12</span> <span style="font-weight:400;color:var(--muted)">/evento</span></label>
         <div class="stepper"><button class="stp" data-k="colab" data-d="-1">−</button><input type="number" id="colab" min="0" value="12"><button class="stp" data-k="colab" data-d="1">+</button></div>
@@ -152,12 +162,18 @@
       <div class="ctl" style="background:var(--bluesoft);padding:12px;border-radius:10px">
         <label>💵 Preço DEFINIDO por criança (R$)</label>
         <input type="number" id="precoDef" min="0" placeholder="Vazio = usa o cálculo">
-        <div class="hint">Igual para 5A e 5B. Se preenchido, o painel projeta o lucro.</div>
+        <div class="hint">Igual para 5A e 5B. Se preenchido, projeta o lucro.</div>
       </div>
       <div class="ctl">
         <label>Preço DEFINIDO por convidado extra (R$)</label>
         <input type="number" id="pExtraDef" min="0" placeholder="Vazio = sugerido">
       </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h2>💾 Cenários / Orçamentos</h2>
+      <div class="row2"><input type="text" id="scName" placeholder="Nome (ex.: Star Happy 4★ único)"><button class="mini" id="btnSaveSc" style="white-space:nowrap;padding:8px 12px">Salvar</button></div>
+      <div id="scList" style="margin-top:12px"></div>
     </div>
   </div>
 
@@ -166,7 +182,8 @@
     <div class="kpis">
       <div class="kpi accent"><div class="lbl">PREÇO POR CRIANÇA</div><div class="num" id="kForm">—</div><div class="sub" id="kFormSub">igual p/ 5A e 5B</div></div>
       <div class="kpi"><div class="lbl">CUSTO POR CRIANÇA</div><div class="num" id="kCusto">—</div><div class="sub">sobre o custo real</div></div>
-      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub">sugerido/pessoa</div></div>
+      <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub" id="kExtraSub">sugerido/pessoa</div></div>
+      <div class="kpi"><div class="lbl">TOTAL DE PESSOAS</div><div class="num" id="kPpl">—</div><div class="sub" id="kPplSub"></div></div>
       <div class="kpi hi"><div class="lbl">SALDO GARANTIDO</div><div class="num" id="kSaldo">—</div><div class="sub" id="kSaldoSub"></div></div>
     </div>
 
@@ -187,10 +204,9 @@
       <div class="hint">“× criança” multiplica pelas 22; “× pessoa” pelo total de pessoas; “× colaborador” pela equipe; “fixo” é por evento. Custo = escola paga · Cobrado = famílias pagam.</div>
     </div>
 
-    <div class="panel section">
-      <h2>📊 Comparação de locais — preço por criança</h2>
-      <div id="bars"></div>
-      <div class="hint" style="margin-top:8px">Verde = mais em conta no cenário atual. Avisos: capacidade excedida.</div>
+    <div class="section split2">
+      <div class="panel"><h2>📊 Comparação de locais — preço por criança</h2><div id="bars"></div><div class="hint" style="margin-top:8px">Verde = mais em conta. Avisos: capacidade excedida.</div></div>
+      <div class="panel"><h2>🧾 Composição do custo</h2><div class="donut-wrap"><div id="donut"></div><div class="legend" id="legend"></div></div></div>
     </div>
 
     <div class="split2">
@@ -198,22 +214,28 @@
       <div class="panel"><h2>👥 Público</h2><table id="pub"></table></div>
     </div>
 
+    <div class="panel section" id="scCompareWrap" style="display:none">
+      <h2>📚 Comparativo dos cenários salvos</h2>
+      <table id="scCompare"></table>
+    </div>
+
     <div class="callout" id="insight"></div>
     <div class="foot">Estimativas a partir dos orçamentos (Cineplus, Star Happy, Di Paladare, Vougue, Obiava). Confirmar com fornecedores. · Renovação Ensino Premium · 2026</div>
   </div>
 
 </div></div>
+<div class="toast" id="toast"></div>
 
 <script>
 const BRL=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 function interp(pts,N){N=Math.max(N,pts[0][0]);for(let i=0;i<pts.length-1;i++){const[x0,y0]=pts[i],[x1,y1]=pts[i+1];if(N<=x1)return y0+(y1-y0)*(N-x0)/(x1-x0);}return pts[pts.length-1][1];}
 const dpP1=[[80,14280],[100,15640],[120,16620],[140,18000],[160,19384],[180,21980],[200,23690],[220,25150],[250,27340]];
 function vg(p80,p100,N){if(N<=80)return p80;if(N<=100)return p100;return p100+((p100-p80)/20)*(N-100);}
-const STAR={3:6590,4:7490,5:8090,6:9490}; // sábado, base 50 convidados
+const STAR={3:6590,4:7490,5:8090,6:9490};
 function starCost(N,pac){return STAR[pac]+Math.max(0,N-50)*50;}
 
-// custo(N)=custo do LOCAL para N pessoas (um evento). marg=custo marginal p/ convidado extra. cinema:formandos ficam à frente.
 const LOCAIS={
   cine5:{nome:'Cinema — Sala Standard',fmt:'cer',cinema:true,cap:140,custo:N=>3000,marg:()=>0,obs:'Cineplus. 140 poltronas (crianças à frente). Cerimônia ~1h; sábado de manhã.'},
   cine6:{nome:'Cinema — Sala TSX (grande)',fmt:'cer',cinema:true,cap:405,custo:N=>4800,marg:()=>0,obs:'Sala grande (405 lugares). Cabe muito convidado.'},
@@ -226,59 +248,59 @@ const LOCAIS={
 const TIPOS=[{v:'formando',l:'× criança'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'fixo (por evento)'}];
 function ci(n,t,c){return {nome:n,tipo:t,custo:c,cobrado:c};}
 function defCustos(){return [ci('Becas (locação)','formando',40),ci('Canudos','formando',25),ci('Certificados/impressões','formando',6),ci('Lembrança da criança','formando',50),ci('Fotografia e social media','fixo',1200),ci('Presente das professoras','fixo',300),ci('Transporte','fixo',150),ci('Equipe (hora extra)','fixo',400),ci('Decoração','fixo',0)];}
-
-const S={fmt:'festa',local:'star',star:4,combo:0,modo:'unico',fA:12,fB:10,inclusos:4,extras:0,colab:12,marg:15,precoDef:0,pExtraDef:0,custos:defCustos()};
-const TOTAL=22;
+function defState(){return {fmt:'festa',local:'star',star:4,combo:0,modo:'unico',fA:12,fB:10,fixDup:true,inclusos:4,extras:0,extrasMode:'form',extrasTotal:40,colab:12,marg:15,precoDef:0,pExtraDef:0,custos:defCustos()};}
+let S=defState(), scenarios=[];
+const TOTAL=22, LS='nivel5_2026';
+function persist(){try{localStorage.setItem(LS,JSON.stringify({S,scenarios}));}catch(e){}}
+function restore(){try{const d=JSON.parse(localStorage.getItem(LS));if(d&&d.S){S=Object.assign(defState(),d.S);scenarios=d.scenarios||[];}}catch(e){}}
 
 function eligible(k){return LOCAIS[k].fmt===S.fmt;}
 function firstElig(){return Object.keys(LOCAIS).find(eligible);}
 
-// custo de UM evento com Fe crianças (parte que varia com o evento: local+combo+pessoa+colaborador)
-function eventoVar(L,Fe,st,markup){
-  const N=Fe + Fe*st.inclusos + st.colab;
-  const venue = L.star?L.custo(N,st.star):L.custo(N);
-  const comboOn=L.cinema&&st.combo>0; const combo=comboOn?st.combo*N:0;
-  let pes=0,pesM=0,col=0,colM=0;
-  (st.custos||[]).forEach(c=>{const cu=+c.custo||0,co=(c.cobrado==null||c.cobrado==='')?cu:(+c.cobrado||0);
-    if(c.tipo==='pessoa'){pes+=cu*N;pesM+=(co-cu)*N;}
-    if(c.tipo==='colaborador'){col+=cu*st.colab;colM+=(co-cu)*st.colab;}});
-  const v=venue+combo+pes+col;
-  return markup?(comboOn? (venue+combo+pes+col) : v) && {v, m:pesM+colM, N} : {v, m:pesM+colM, N};
-}
-
 function calc(key,st){
   st=st||S; const L=LOCAIS[key];
   const dois=st.modo==='dois';
-  const eventos = dois?[+st.fA||0,+st.fB||0]:[TOTAL];
-  const students = dois?((+st.fA||0)+(+st.fB||0)):TOTAL;
+  const eventos=dois?[+st.fA||0,+st.fB||0]:[TOTAL];
+  const students=dois?((+st.fA||0)+(+st.fB||0)):TOTAL;
+  const comboOn=L.cinema&&st.combo>0;
   // itens por criança (nunca dobram) + fixos (por evento)
   let perStudCusto=0,perStudMk=0,fixoCusto=0,fixoMk=0;
   (st.custos||[]).forEach(c=>{const cu=+c.custo||0,co=(c.cobrado==null||c.cobrado==='')?cu:(+c.cobrado||0);
     if(c.tipo==='formando'){perStudCusto+=cu*students;perStudMk+=(co-cu)*students;}
     if(c.tipo==='fixo'){fixoCusto+=cu;fixoMk+=(co-cu);}});
-  const fixTimes = (dois && st.fixDup)?eventos.length:1;
-  let varCusto=0,varMk=0,Ns=[];
-  eventos.forEach(Fe=>{const e=eventoVar(L,Fe,st,false);varCusto+=e.v;varMk+=e.m;Ns.push(e.N);});
-  const custoBase=varCusto+perStudCusto+fixoCusto*fixTimes;
-  const markup=varMk+perStudMk+fixoMk*fixTimes;
+  const fixTimes=(dois&&st.fixDup)?eventos.length:1;
+  // parte variável (local, combo, pessoa, colaborador) por evento
+  let venueSum=0,comboSum=0,pesCusto=0,pesMk=0,colCusto=0,colMk=0,Ns=[];
+  eventos.forEach(Fe=>{const N=Fe+Fe*st.inclusos+st.colab;Ns.push(N);
+    venueSum+=L.star?L.custo(N,st.star):L.custo(N);
+    comboSum+=comboOn?st.combo*N:0;
+    (st.custos||[]).forEach(c=>{const cu=+c.custo||0,co=(c.cobrado==null||c.cobrado==='')?cu:(+c.cobrado||0);
+      if(c.tipo==='pessoa'){pesCusto+=cu*N;pesMk+=(co-cu)*N;}
+      if(c.tipo==='colaborador'){colCusto+=cu*st.colab;colMk+=(co-cu)*st.colab;}});});
+  const custoBase=venueSum+comboSum+pesCusto+colCusto+perStudCusto+fixoCusto*fixTimes;
+  const markup=pesMk+colMk+perStudMk+fixoMk*fixTimes;
+  // composição p/ o gráfico (lado custo)
+  const parts=[{n:'Local',v:venueSum}]; if(comboSum>0)parts.push({n:'Combo pipoca',v:comboSum});
+  (st.custos||[]).forEach(c=>{const cu=+c.custo||0;let v=0;
+    if(c.tipo==='formando')v=cu*students;else if(c.tipo==='pessoa')v=cu*Ns.reduce((a,b)=>a+b,0);
+    else if(c.tipo==='colaborador')v=cu*st.colab*eventos.length;else v=cu*fixTimes;
+    if(v>0)parts.push({n:c.nome,v});});
   const margFrac=st.marg/100;
   const alvo=custoBase*(1+margFrac);
   const pFormEq=students>0?alvo/students:0;
   const pFormSug=pFormEq+markup/students;
   const usaDef=(+st.precoDef||0)>0;
   const pForm=usaDef?(+st.precoDef):pFormSug;
-  // convidado extra (marginal do local) — bônus
   const baseMarg=(L.cinema&&st.combo>0)?st.combo:(L.star?50:L.marg(Ns[0]||60));
   const pExtraCalc=Math.ceil((baseMarg*(1+margFrac))/5)*5;
   const usaExtraDef=(+st.pExtraDef||0)>0;
   const pExtra=usaExtraDef?(+st.pExtraDef):pExtraCalc;
-  const nExtras=Math.round(students*(+st.extras||0));
-  // capacidade: por evento
-  const capWarn = L.cap>0 && Ns.some((N,i)=>{const seats=(L.cinema||L.exKids)?Math.max(0,N-eventos[i]):N; return seats>L.cap;});
+  const nExtras=st.extrasMode==='total'?Math.round(+st.extrasTotal||0):Math.round(students*(+st.extras||0));
+  const capWarn=L.cap>0&&Ns.some((N,i)=>{const seats=(L.cinema||L.exKids)?Math.max(0,N-eventos[i]):N;return seats>L.cap;});
   const receitaBase=pForm*students;
   const saldoBase=receitaBase-custoBase;
   const totalPessoas=Ns.reduce((a,b)=>a+b,0)+nExtras;
-  return {L,key,students,eventos,Ns,custoBase,markup,pFormEq,pFormSug,pForm,usaDef,pExtra,pExtraCalc,usaExtraDef,nExtras,capWarn,receitaBase,saldoBase,totalPessoas,dois,fixTimes};
+  return {L,key,students,eventos,Ns,parts,custoBase,markup,pFormEq,pFormSug,pForm,usaDef,pExtra,pExtraCalc,usaExtraDef,nExtras,capWarn,receitaBase,saldoBase,totalPessoas,dois,fixTimes};
 }
 
 // ---- UI ----
@@ -288,28 +310,37 @@ seg('segFmt','data-f',v=>{S.fmt=v;if(!eligible(S.local))S.local=firstElig();sync
 seg('segStar','data-p',v=>{S.star=+v;render();});
 seg('segCombo','data-c',v=>{S.combo=+v;render();});
 seg('segModo','data-m',v=>{S.modo=v;syncUI();render();});
+seg('segExtraMode','data-m',v=>{S.extrasMode=v;syncExtra();render();});
 document.getElementById('local').onchange=e=>{S.local=e.target.value;syncUI();render();};
 document.getElementById('fixDup').onchange=e=>{S.fixDup=e.target.checked;render();};
 document.getElementById('marg').oninput=e=>{S.marg=+e.target.value;document.getElementById('vMarg').textContent=S.marg+'%';render();};
 document.getElementById('precoDef').oninput=e=>{S.precoDef=+e.target.value||0;render();};
 document.getElementById('pExtraDef').oninput=e=>{S.pExtraDef=+e.target.value||0;render();};
 function bindNum(id,key,min){min=min||0;const el=document.getElementById(id);el.oninput=()=>{let v=parseFloat(el.value);if(isNaN(v)||v<min)v=min;S[key]=v;if(id==='colab')document.getElementById('vColab').textContent=v;render();};}
-['inclusos','extras','colab','fA','fB'].forEach(k=>bindNum(k,k, k==='fA'||k==='fB'?1:0));
-document.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;const inp=document.getElementById(k);const mn=+(inp.min||0);let v=(+S[k]||0)+d;if(v<mn)v=mn;S[k]=v;inp.value=v;if(k==='colab')document.getElementById('vColab').textContent=v;render();});
-S.fixDup=true;
+['inclusos','colab','fA','fB'].forEach(k=>bindNum(k,k,(k==='fA'||k==='fB')?1:0));
+// extras (modo média/total)
+function extraVal(){return S.extrasMode==='total'?(+S.extrasTotal||0):(+S.extras||0);}
+function setExtraVal(v){if(S.extrasMode==='total')S.extrasTotal=v;else S.extras=v;}
+function syncExtra(){setSeg('segExtraMode','data-m',S.extrasMode||'form');const inp=document.getElementById('extrasVal');inp.step=S.extrasMode==='total'?'1':'0.5';inp.value=extraVal();document.getElementById('extraHint').innerHTML=S.extrasMode==='total'?'Quantidade <b>total</b> de convidados extras liberada (pool).':'Média de convidados extras <b>por criança</b> (aceita decimais).';}
+document.getElementById('extrasVal').oninput=()=>{let v=parseFloat(document.getElementById('extrasVal').value);if(isNaN(v)||v<0)v=0;setExtraVal(v);render();};
+document.querySelectorAll('.stp').forEach(b=>b.onclick=()=>{const k=b.dataset.k,d=+b.dataset.d;
+  if(k==='extrasVal'){let v=extraVal()+d;if(v<0)v=0;setExtraVal(v);document.getElementById('extrasVal').value=v;render();return;}
+  const inp=document.getElementById(k);const mn=+(inp.min||0);let v=(+S[k]||0)+d;if(v<mn)v=mn;S[k]=v;inp.value=v;if(k==='colab')document.getElementById('vColab').textContent=v;render();});
 
 function fillLocais(){const sel=document.getElementById('local');sel.innerHTML='';Object.keys(LOCAIS).filter(eligible).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=LOCAIS[k].nome;sel.appendChild(o);});sel.value=S.local;}
 function syncUI(){
   setSeg('segFmt','data-f',S.fmt);setSeg('segModo','data-m',S.modo);setSeg('segStar','data-p',S.star);setSeg('segCombo','data-c',S.combo);
+  if(!eligible(S.local))S.local=firstElig();
   fillLocais();
   document.getElementById('fmtHint').textContent=S.fmt==='cer'?'Só a cerimônia (sem brinquedos). Mais em conta.':'Festa com comida e brinquedos — o que as famílias costumam escolher.';
   document.getElementById('starCtl').style.display=(S.local==='star')?'block':'none';
   document.getElementById('comboCtl').style.display=(LOCAIS[S.local].cinema)?'block':'none';
   document.getElementById('doisCtl').style.display=(S.modo==='dois')?'block':'none';
   document.getElementById('vColab').textContent=S.colab;document.getElementById('vMarg').textContent=S.marg+'%';
-  document.getElementById('inclusos').value=S.inclusos;document.getElementById('extras').value=S.extras;document.getElementById('colab').value=S.colab;
-  document.getElementById('fA').value=S.fA;document.getElementById('fB').value=S.fB;
-  buildCustos();
+  document.getElementById('inclusos').value=S.inclusos;document.getElementById('colab').value=S.colab;document.getElementById('fA').value=S.fA;document.getElementById('fB').value=S.fB;
+  document.getElementById('fixDup').checked=S.fixDup;document.getElementById('marg').value=S.marg;
+  document.getElementById('precoDef').value=S.precoDef||'';document.getElementById('pExtraDef').value=S.pExtraDef||'';
+  syncExtra();buildCustos();
 }
 
 function buildCustos(){document.getElementById('custosBody').innerHTML=S.custos.map((c,i)=>`<tr>
@@ -323,8 +354,20 @@ document.getElementById('custosBody').addEventListener('input',e=>{const i=+e.ta
 document.getElementById('custosBody').addEventListener('change',e=>{if(e.target.dataset.k==='tipo'){S.custos[+e.target.dataset.i].tipo=e.target.value;render();}});
 document.getElementById('custosBody').addEventListener('click',e=>{const a=e.target.dataset.act;if(!a)return;const i=+e.target.dataset.i;if(a==='zero'){S.custos[i].custo=0;S.custos[i].cobrado=0;}if(a==='del')S.custos.splice(i,1);buildCustos();render();});
 document.getElementById('btnAdd').onclick=()=>{S.custos.push(ci('Novo custo','fixo',0));buildCustos();render();};
-document.getElementById('btnZero').onclick=()=>{S.custos.forEach(c=>{c.custo=0;c.cobrado=0;});buildCustos();render();};
-document.getElementById('btnReset').onclick=()=>{S.custos=defCustos();buildCustos();render();};
+document.getElementById('btnZero').onclick=()=>{S.custos.forEach(c=>{c.custo=0;c.cobrado=0;});buildCustos();render();toast('Custos zerados');};
+document.getElementById('btnReset').onclick=()=>{S.custos=defCustos();buildCustos();render();toast('Custos padrão restaurados');};
+
+// cenários
+document.getElementById('btnSaveSc').onclick=()=>{const nm=(document.getElementById('scName').value||'').trim()||('Cenário '+(scenarios.length+1));scenarios.push({nome:nm,state:JSON.parse(JSON.stringify(S))});document.getElementById('scName').value='';renderSc();persist();toast('Cenário salvo: '+nm);};
+function renderSc(){
+  const list=document.getElementById('scList');
+  list.innerHTML=scenarios.map((s,i)=>{const r=calc(s.state.local,s.state);return `<div class="sc-item"><div><b>${esc(s.nome)}</b><div class="meta">${esc(LOCAIS[s.state.local].nome)} · ${s.state.modo==='dois'?'2 eventos':'único'} · ${BRL(r.pForm)}/criança</div></div><div style="display:flex;gap:6px"><button class="mini" data-sc="load" data-i="${i}">abrir</button><button class="mini del" data-sc="del" data-i="${i}">✕</button></div></div>`;}).join('')||'<div class="hint">Nenhum cenário salvo ainda.</div>';
+  const wrap=document.getElementById('scCompareWrap');
+  if(scenarios.length){wrap.style.display='block';
+    document.getElementById('scCompare').innerHTML=`<tr><th>Cenário</th><th>Local</th><th>Evento</th><th class="r">R$/criança</th><th class="r">Custo total</th><th class="r">Pessoas</th><th class="r">Saldo</th></tr>`+scenarios.map(s=>{const r=calc(s.state.local,s.state);return `<tr><td><b>${esc(s.nome)}</b></td><td>${esc(LOCAIS[s.state.local].nome)}</td><td>${s.state.modo==='dois'?'2 eventos':'único'}</td><td class="r tot">${BRL(r.pForm)}</td><td class="r">${BRL(r.custoBase)}</td><td class="r">${r.totalPessoas}</td><td class="r" style="color:${r.saldoBase>=0?'var(--green)':'var(--red)'}">${BRL(r.saldoBase)}</td></tr>`;}).join('');
+  }else wrap.style.display='none';
+}
+document.getElementById('scList').addEventListener('click',e=>{const a=e.target.dataset.sc;if(!a)return;const i=+e.target.dataset.i;if(a==='load'){S=Object.assign(defState(),JSON.parse(JSON.stringify(scenarios[i].state)));syncUI();render();toast('Cenário aberto');}if(a==='del'){scenarios.splice(i,1);renderSc();persist();}});
 
 function render(){
   const r=calc(S.local);
@@ -333,13 +376,16 @@ function render(){
   document.getElementById('kFormSub').textContent=r.usaDef?`definido · sugerido ${BRL(r.pFormSug)}`:`igual p/ 5A e 5B`;
   document.getElementById('kCusto').textContent=BRL(r.custoBase/r.students);
   document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
+  document.getElementById('kExtraSub').textContent=r.usaExtraDef?`definido · sugerido ${BRL(r.pExtraCalc)}`:'sugerido/pessoa';
+  document.getElementById('kPpl').textContent=r.totalPessoas;
+  document.getElementById('kPplSub').textContent=`22 crianças + convidados + ${r.nExtras} extras`;
   document.getElementById('kSaldo').textContent=BRL(r.saldoBase);
   document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldoBase>=0);
   document.getElementById('kSaldoSub').textContent=r.nExtras>0?`+ bônus se vierem ${r.nExtras} extras`:(r.saldoBase>=0?'sobra sobre o custo':'FALTA cobrir');
-  // custos margem
   document.querySelectorAll('#custosBody .ci-m').forEach(td=>{const i=+td.dataset.i;const c=S.custos[i];if(!c){td.textContent='—';return;}const m=((c.cobrado||0)-(c.custo||0));td.textContent=(m>0?'+':'')+BRL(m)+'/un';td.style.color=m>0?'var(--green)':(m<0?'var(--red)':'var(--muted)');});
+
   // comparação único x dois
-  const uni=calc(S.local,{...S,modo:'unico'}), dois=calc(S.local,{...S,modo:'dois'});
+  const uni=calc(S.local,{...S,modo:'unico'}),dois=calc(S.local,{...S,modo:'dois'});
   document.getElementById('cmpUniV').textContent=BRL(uni.pForm);
   document.getElementById('cmpUniD').textContent=`custo total ${BRL(uni.custoBase)}`;
   document.getElementById('cmpDoisV').textContent=BRL(dois.pForm);
@@ -351,42 +397,50 @@ function render(){
 
   // barras
   const cand=Object.keys(LOCAIS).filter(eligible).map(k=>({k,r:calc(k)}));
-  const max=Math.max(...cand.map(c=>c.r.pForm),1), best=cand.reduce((a,b)=>b.r.pForm<a.r.pForm?b:a);
+  const max=Math.max(...cand.map(c=>c.r.pForm),1),best=cand.reduce((a,b)=>b.r.pForm<a.r.pForm?b:a);
   document.getElementById('bars').innerHTML=cand.map(c=>{const isSel=c.k===S.local,isBest=c.k===best.k;
-    return `<div class="bar-row ${isSel?'sel':''}"><div class="name">${esc(c.r.L.nome)}${isSel?' <span class="tag">atual</span>':''}${c.r.capWarn?' <span class="tag warn">excede capacidade</span>':''}<small>${c.r.dois?'2 eventos':'1 evento'} · ${c.r.totalPessoas} pessoas</small></div>
+    return `<div class="bar-row ${isSel?'sel':''}"><div class="name">${esc(c.r.L.nome)}${isSel?' <span class="tag">atual</span>':''}${c.r.capWarn?' <span class="tag warn">excede</span>':''}<small>${c.r.dois?'2 eventos':'1 evento'} · ${c.r.totalPessoas} pessoas</small></div>
     <div class="track"><div class="fill ${isBest?'best':''}" style="width:${Math.max(8,c.r.pForm/max*100)}%"></div></div><div class="price">${BRL(c.r.pForm)}</div></div>`;}).join('');
 
+  // donut
+  const palette=['#1D2748','#123FC7','#5B9BD5','#8AB6DE','#1C7048','#7FC79A','#E85D0C','#E0A458','#9AA7B5','#D98880','#48C9B0'];
+  const parts=r.parts.filter(p=>p.v>0);const tot=parts.reduce((a,b)=>a+b.v,0)||1;let acc=0;
+  const segsC=parts.map((p,i)=>{const a0=acc/tot*360;acc+=p.v;return `${palette[i%palette.length]} ${a0}deg ${acc/tot*360}deg`;}).join(',');
+  document.getElementById('donut').innerHTML=`<div style="width:140px;height:140px;border-radius:50%;background:conic-gradient(${segsC});position:relative"><div style="position:absolute;inset:24px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:10px;color:var(--muted)">CUSTO</div><div style="font-size:15px;font-weight:800;color:var(--navy)">${BRL(tot)}</div></div></div>`;
+  document.getElementById('legend').innerHTML=parts.map((p,i)=>`<div><span class="dot" style="background:${palette[i%palette.length]}"></span>${esc(p.n)} — <b>${BRL(p.v)}</b> <span style="color:var(--muted)">(${Math.round(p.v/tot*100)}%)</span></div>`).join('');
+
   // financeiro
-  document.getElementById('fin').innerHTML=`
-    <tr><th>Item</th><th class="r">Valor</th></tr>
+  document.getElementById('fin').innerHTML=`<tr><th>Item</th><th class="r">Valor</th></tr>
     <tr><td>Receita das crianças (22 × ${BRL(r.pForm)})</td><td class="r">${BRL(r.receitaBase)}</td></tr>
     <tr><td>Custo do evento (garantido)</td><td class="r">− ${BRL(r.custoBase)}</td></tr>
     <tr class="total"><td class="tot">Saldo garantido</td><td class="r tot" style="color:${r.saldoBase>=0?'var(--green)':'var(--red)'}">${BRL(r.saldoBase)}</td></tr>`;
   // público
-  const linhas = r.dois? r.eventos.map((f,i)=>`<tr><td>Turma ${i===0?'5A':'5B'} (${f} crianças)</td><td class="r">${r.Ns[i]} pessoas</td></tr>`).join('') : `<tr><td>Evento único (22 crianças)</td><td class="r">${r.Ns[0]} pessoas</td></tr>`;
+  const linhas=r.dois?r.eventos.map((f,i)=>`<tr><td>Turma ${i===0?'5A':'5B'} (${f} crianças)</td><td class="r">${r.Ns[i]} pessoas</td></tr>`).join(''):`<tr><td>Evento único (22 crianças)</td><td class="r">${r.Ns[0]} pessoas</td></tr>`;
   document.getElementById('pub').innerHTML=`<tr><th>Evento</th><th class="r">Público garantido</th></tr>${linhas}<tr><td>Convidados extras (bônus)</td><td class="r">${r.nExtras}</td></tr><tr class="total"><td class="tot">Total previsto</td><td class="r tot">${r.totalPessoas} pessoas</td></tr>`;
 
   // insight
   let m='';
-  if(S.fmt==='cer'&&r.L.cinema) m=`<b>Opção econômica no cinema:</b> ~${BRL(r.pForm)}/criança. Cerimônia de ~1h; as famílias saem depois. Sem brinquedos (que só fazem sentido com festa).`;
-  else if(S.local==='star') m=`<b>Star Happy:</b> buffet infantil completo (brinquedão, piscina de bolinhas, monitores, comida de festa) — o formato clássico da Educação Infantil. Base 50 convidados; acima disso, R$50 por pessoa.`;
-  else if(S.local==='dipal') m=`<b>Di Paladare:</b> jantar mais "formal" + espaço kids + DJ. Cabe as duas turmas juntas com folga.`;
+  if(S.fmt==='cer'&&r.L.cinema)m=`<b>Opção econômica no cinema:</b> ~${BRL(r.pForm)}/criança. Cerimônia de ~1h; as famílias saem depois. Sem brinquedos (que só fazem sentido com festa).`;
+  else if(S.local==='star')m=`<b>Star Happy:</b> buffet infantil completo (brinquedão, piscina de bolinhas, monitores, comida de festa). Base 50 convidados; acima disso, R$50 por pessoa.`;
+  else if(S.local==='dipal')m=`<b>Di Paladare:</b> jantar mais "formal" + espaço kids + DJ. Cabe as duas turmas juntas com folga.`;
   else m=`<b>${esc(r.L.nome)}.</b>`;
-  m+=` <br><br>💡 <b>Modelo conservador:</b> o preço por criança cobre o evento mesmo sem convidados extras; cada extra que vier é bônus. E o valor é <b>igual para 5A e 5B</b>, mesmo com tamanhos diferentes.`;
-  if(r.capWarn) m=`<b style="color:var(--red)">⚠ Capacidade excedida</b> em pelo menos um evento para ${esc(r.L.nome)}. Reduza convidados, use sala/salão maior ou separe as turmas.<br><br>`+m;
+  m+=` <br><br>💡 <b>Modelo conservador:</b> o preço por criança cobre o evento mesmo sem convidados extras; cada extra é bônus. O valor é <b>igual para 5A e 5B</b>.`;
+  if(r.capWarn)m=`<b style="color:var(--red)">⚠ Capacidade excedida</b> em pelo menos um evento para ${esc(r.L.nome)}. Reduza convidados, use local maior ou separe as turmas.<br><br>`+m;
   document.getElementById('insight').innerHTML=m;
+
+  renderSc();persist();
 }
 
-document.getElementById('btnExport').onclick=()=>{
-  const r=calc(S.local);
-  const data={meta:{app:'Dashboard Nível 5 2026',exportadoEm:new Date().toISOString()},estado:S,resultado:{
-    local:r.L.nome,modo:S.modo,criancas:22,turmas:S.modo==='dois'?{'5A':S.fA,'5B':S.fB}:null,
-    precoPorCrianca:Math.round(r.pForm),custoPorCrianca:Math.round(r.custoBase/22),custoTotal:Math.round(r.custoBase),
-    saldoGarantido:Math.round(r.saldoBase),convidadoExtra:r.pExtra,publicoTotal:r.totalPessoas}};
-  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='nivel5_2026_'+new Date().toISOString().slice(0,10)+'.json';a.click();
-};
+// export / import / reset
+document.getElementById('btnExport').onclick=()=>{const r=calc(S.local);
+  const data={meta:{app:'Dashboard Nível 5 2026',exportadoEm:new Date().toISOString()},atual:{state:S,resultado:{local:r.L.nome,modo:S.modo,criancas:22,turmas:S.modo==='dois'?{'5A':S.fA,'5B':S.fB}:null,precoPorCrianca:Math.round(r.pForm),custoPorCrianca:Math.round(r.custoBase/22),custoTotal:Math.round(r.custoBase),saldoGarantido:Math.round(r.saldoBase),convidadoExtra:r.pExtra,publicoTotal:r.totalPessoas}},
+    cenarios:scenarios.map(s=>{const rr=calc(s.state.local,s.state);return {nome:s.nome,state:s.state,resultado:{local:LOCAIS[s.state.local].nome,precoPorCrianca:Math.round(rr.pForm),custoTotal:Math.round(rr.custoBase),saldo:Math.round(rr.saldoBase),pessoas:rr.totalPessoas}};})};
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='nivel5_2026_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Dados exportados');};
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
+document.getElementById('fileImport').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.atual&&d.atual.state)S=Object.assign(defState(),d.atual.state);else if(d.S)S=Object.assign(defState(),d.S);if(d.cenarios)scenarios=d.cenarios.map(c=>({nome:c.nome,state:c.state}));else if(d.scenarios)scenarios=d.scenarios;syncUI();render();toast('Dados importados');}catch(err){toast('Arquivo inválido');}};rd.readAsText(f);};
+document.getElementById('btnResetAll').onclick=()=>{if(confirm('Resetar o cenário atual para o padrão? (os salvos são mantidos)')){S=defState();syncUI();render();toast('Cenário resetado');}};
 
-syncUI();render();
+restore();syncUI();render();
 </script>
 </body>
 </html>
