@@ -129,13 +129,25 @@
         <div class="hint">No modo "dois eventos", o custo total é somado e <b>dividido igualmente pelas 22 crianças</b>.</div>
       </div>
 
+      <div class="ctl" id="unicoCtl">
+        <label>Nº de crianças (evento único)</label>
+        <div class="stepper"><button class="stp" data-k="formandos" data-d="-1">−</button><input type="number" id="formandos" min="1" value="22"><button class="stp" data-k="formandos" data-d="1">+</button></div>
+        <div class="hint">Projete quantas crianças participam (padrão 22). Menos crianças = mais caro por criança.</div>
+      </div>
+
       <div class="ctl" id="doisCtl" style="display:none">
-        <label>Crianças por turma (5A · 5B)</label>
-        <div class="two">
-          <div class="stepper"><button class="stp" data-k="fA" data-d="-1">−</button><input type="number" id="fA" min="1" value="12"><button class="stp" data-k="fA" data-d="1">+</button></div>
-          <div class="stepper"><button class="stp" data-k="fB" data-d="-1">−</button><input type="number" id="fB" min="1" value="10"><button class="stp" data-k="fB" data-d="1">+</button></div>
+        <label>Crianças por turma</label>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px">Turma 5A</div>
+            <div class="stepper" style="max-width:none"><button class="stp" data-k="fA" data-d="-1">−</button><input type="number" id="fA" min="1" value="12"><button class="stp" data-k="fA" data-d="1">+</button></div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px">Turma 5B</div>
+            <div class="stepper" style="max-width:none"><button class="stp" data-k="fB" data-d="-1">−</button><input type="number" id="fB" min="1" value="10"><button class="stp" data-k="fB" data-d="1">+</button></div>
+          </div>
         </div>
-        <label style="margin-top:8px;font-weight:600;font-size:12.5px"><input type="checkbox" id="fixDup" checked> Espaço e custos fixos dobram (2 eventos)</label>
+        <label style="margin-top:10px;font-weight:600;font-size:12.5px"><input type="checkbox" id="fixDup" checked> Espaço e custos fixos dobram (2 eventos)</label>
         <div class="hint">Ligado: locação, foto, equipe e decoração contam 2×. Itens por criança (beca, canudo, lembrança) nunca dobram.</div>
       </div>
 
@@ -248,7 +260,7 @@ const LOCAIS={
 const TIPOS=[{v:'formando',l:'× criança'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'fixo (por evento)'}];
 function ci(n,t,c){return {nome:n,tipo:t,custo:c,cobrado:c};}
 function defCustos(){return [ci('Becas (locação)','formando',40),ci('Canudos','formando',25),ci('Certificados/impressões','formando',6),ci('Lembrança da criança','formando',50),ci('Fotografia e social media','fixo',1200),ci('Presente das professoras','fixo',300),ci('Transporte','fixo',150),ci('Equipe (hora extra)','fixo',400),ci('Decoração','fixo',0)];}
-function defState(){return {fmt:'festa',local:'star',star:4,combo:0,modo:'unico',fA:12,fB:10,fixDup:true,inclusos:4,extras:0,extrasMode:'form',extrasTotal:40,colab:12,marg:15,precoDef:0,pExtraDef:0,custos:defCustos()};}
+function defState(){return {fmt:'festa',local:'star',star:4,combo:0,modo:'unico',formandos:22,fA:12,fB:10,fixDup:true,inclusos:4,extras:0,extrasMode:'form',extrasTotal:40,colab:12,marg:15,precoDef:0,pExtraDef:0,custos:defCustos()};}
 let S=defState(), scenarios=[];
 const TOTAL=22, LS='nivel5_2026';
 function persist(){try{localStorage.setItem(LS,JSON.stringify({S,scenarios}));}catch(e){}}
@@ -260,8 +272,8 @@ function firstElig(){return Object.keys(LOCAIS).find(eligible);}
 function calc(key,st){
   st=st||S; const L=LOCAIS[key];
   const dois=st.modo==='dois';
-  const eventos=dois?[+st.fA||0,+st.fB||0]:[TOTAL];
-  const students=dois?((+st.fA||0)+(+st.fB||0)):TOTAL;
+  const eventos=dois?[+st.fA||0,+st.fB||0]:[+st.formandos||TOTAL];
+  const students=dois?((+st.fA||0)+(+st.fB||0)):(+st.formandos||TOTAL);
   const comboOn=L.cinema&&st.combo>0;
   // itens por criança (nunca dobram) + fixos (por evento)
   let perStudCusto=0,perStudMk=0,fixoCusto=0,fixoMk=0;
@@ -317,7 +329,7 @@ document.getElementById('marg').oninput=e=>{S.marg=+e.target.value;document.getE
 document.getElementById('precoDef').oninput=e=>{S.precoDef=+e.target.value||0;render();};
 document.getElementById('pExtraDef').oninput=e=>{S.pExtraDef=+e.target.value||0;render();};
 function bindNum(id,key,min){min=min||0;const el=document.getElementById(id);el.oninput=()=>{let v=parseFloat(el.value);if(isNaN(v)||v<min)v=min;S[key]=v;if(id==='colab')document.getElementById('vColab').textContent=v;render();};}
-['inclusos','colab','fA','fB'].forEach(k=>bindNum(k,k,(k==='fA'||k==='fB')?1:0));
+['inclusos','colab','fA','fB','formandos'].forEach(k=>bindNum(k,k,(k==='fA'||k==='fB'||k==='formandos')?1:0));
 // extras (modo média/total)
 function extraVal(){return S.extrasMode==='total'?(+S.extrasTotal||0):(+S.extras||0);}
 function setExtraVal(v){if(S.extrasMode==='total')S.extrasTotal=v;else S.extras=v;}
@@ -336,8 +348,9 @@ function syncUI(){
   document.getElementById('starCtl').style.display=(S.local==='star')?'block':'none';
   document.getElementById('comboCtl').style.display=(LOCAIS[S.local].cinema)?'block':'none';
   document.getElementById('doisCtl').style.display=(S.modo==='dois')?'block':'none';
+  document.getElementById('unicoCtl').style.display=(S.modo==='dois')?'none':'block';
   document.getElementById('vColab').textContent=S.colab;document.getElementById('vMarg').textContent=S.marg+'%';
-  document.getElementById('inclusos').value=S.inclusos;document.getElementById('colab').value=S.colab;document.getElementById('fA').value=S.fA;document.getElementById('fB').value=S.fB;
+  document.getElementById('inclusos').value=S.inclusos;document.getElementById('colab').value=S.colab;document.getElementById('fA').value=S.fA;document.getElementById('fB').value=S.fB;document.getElementById('formandos').value=S.formandos;
   document.getElementById('fixDup').checked=S.fixDup;document.getElementById('marg').value=S.marg;
   document.getElementById('precoDef').value=S.precoDef||'';document.getElementById('pExtraDef').value=S.pExtraDef||'';
   syncExtra();buildCustos();
@@ -378,7 +391,7 @@ function render(){
   document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
   document.getElementById('kExtraSub').textContent=r.usaExtraDef?`definido · sugerido ${BRL(r.pExtraCalc)}`:'sugerido/pessoa';
   document.getElementById('kPpl').textContent=r.totalPessoas;
-  document.getElementById('kPplSub').textContent=`22 crianças + convidados + ${r.nExtras} extras`;
+  document.getElementById('kPplSub').textContent=`${r.students} crianças + convidados + ${r.nExtras} extras`;
   document.getElementById('kSaldo').textContent=BRL(r.saldoBase);
   document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldoBase>=0);
   document.getElementById('kSaldoSub').textContent=r.nExtras>0?`+ bônus se vierem ${r.nExtras} extras`:(r.saldoBase>=0?'sobra sobre o custo':'FALTA cobrir');
@@ -393,7 +406,7 @@ function render(){
   document.getElementById('cmpDoisD').textContent=`${dif>=0?'+':''}${BRL(dif)}/criança · custo total ${BRL(dois.custoBase)}`;
   document.getElementById('cmpUni').classList.toggle('on',S.modo==='unico');
   document.getElementById('cmpDois').classList.toggle('on',S.modo==='dois');
-  document.getElementById('cmpHint').innerHTML=`Separar em dois eventos ${dif>0?`encarece cerca de <b>${BRL(dif)}/criança</b> (${BRL(dif*22)} no total)`:'sai igual ou mais barato'}, porque ${S.fixDup?'o espaço e os custos fixos contam 2×':'só a parte variável muda'}. O preço é sempre dividido igualmente pelas 22 crianças.`;
+  document.getElementById('cmpHint').innerHTML=`Separar em dois eventos ${dif>0?`encarece cerca de <b>${BRL(dif)}/criança</b> (${BRL(dif*dois.students)} no total)`:'sai igual ou mais barato'}, porque ${S.fixDup?'o espaço e os custos fixos contam 2×':'só a parte variável muda'}. O preço é sempre dividido igualmente entre as ${dois.students} crianças.`;
 
   // barras
   const cand=Object.keys(LOCAIS).filter(eligible).map(k=>({k,r:calc(k)}));
@@ -411,11 +424,11 @@ function render(){
 
   // financeiro
   document.getElementById('fin').innerHTML=`<tr><th>Item</th><th class="r">Valor</th></tr>
-    <tr><td>Receita das crianças (22 × ${BRL(r.pForm)})</td><td class="r">${BRL(r.receitaBase)}</td></tr>
+    <tr><td>Receita das crianças (${r.students} × ${BRL(r.pForm)})</td><td class="r">${BRL(r.receitaBase)}</td></tr>
     <tr><td>Custo do evento (garantido)</td><td class="r">− ${BRL(r.custoBase)}</td></tr>
     <tr class="total"><td class="tot">Saldo garantido</td><td class="r tot" style="color:${r.saldoBase>=0?'var(--green)':'var(--red)'}">${BRL(r.saldoBase)}</td></tr>`;
   // público
-  const linhas=r.dois?r.eventos.map((f,i)=>`<tr><td>Turma ${i===0?'5A':'5B'} (${f} crianças)</td><td class="r">${r.Ns[i]} pessoas</td></tr>`).join(''):`<tr><td>Evento único (22 crianças)</td><td class="r">${r.Ns[0]} pessoas</td></tr>`;
+  const linhas=r.dois?r.eventos.map((f,i)=>`<tr><td>Turma ${i===0?'5A':'5B'} (${f} crianças)</td><td class="r">${r.Ns[i]} pessoas</td></tr>`).join(''):`<tr><td>Evento único (${r.students} crianças)</td><td class="r">${r.Ns[0]} pessoas</td></tr>`;
   document.getElementById('pub').innerHTML=`<tr><th>Evento</th><th class="r">Público garantido</th></tr>${linhas}<tr><td>Convidados extras (bônus)</td><td class="r">${r.nExtras}</td></tr><tr class="total"><td class="tot">Total previsto</td><td class="r tot">${r.totalPessoas} pessoas</td></tr>`;
 
   // insight
@@ -433,7 +446,7 @@ function render(){
 
 // export / import / reset
 document.getElementById('btnExport').onclick=()=>{const r=calc(S.local);
-  const data={meta:{app:'Dashboard Nível 5 2026',exportadoEm:new Date().toISOString()},atual:{state:S,resultado:{local:r.L.nome,modo:S.modo,criancas:22,turmas:S.modo==='dois'?{'5A':S.fA,'5B':S.fB}:null,precoPorCrianca:Math.round(r.pForm),custoPorCrianca:Math.round(r.custoBase/22),custoTotal:Math.round(r.custoBase),saldoGarantido:Math.round(r.saldoBase),convidadoExtra:r.pExtra,publicoTotal:r.totalPessoas}},
+  const data={meta:{app:'Dashboard Nível 5 2026',exportadoEm:new Date().toISOString()},atual:{state:S,resultado:{local:r.L.nome,modo:S.modo,criancas:r.students,turmas:S.modo==='dois'?{'5A':S.fA,'5B':S.fB}:null,precoPorCrianca:Math.round(r.pForm),custoPorCrianca:Math.round(r.custoBase/r.students),custoTotal:Math.round(r.custoBase),saldoGarantido:Math.round(r.saldoBase),convidadoExtra:r.pExtra,publicoTotal:r.totalPessoas}},
     cenarios:scenarios.map(s=>{const rr=calc(s.state.local,s.state);return {nome:s.nome,state:s.state,resultado:{local:LOCAIS[s.state.local].nome,precoPorCrianca:Math.round(rr.pForm),custoTotal:Math.round(rr.custoBase),saldo:Math.round(rr.saldoBase),pessoas:rr.totalPessoas}};})};
   const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='nivel5_2026_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Dados exportados');};
 document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
