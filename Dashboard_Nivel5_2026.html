@@ -195,7 +195,7 @@
       <div class="kpi accent"><div class="lbl">PREÇO POR CRIANÇA</div><div class="num" id="kForm">—</div><div class="sub" id="kFormSub">igual p/ 5A e 5B</div></div>
       <div class="kpi"><div class="lbl">CUSTO POR CRIANÇA</div><div class="num" id="kCusto">—</div><div class="sub">sobre o custo real</div></div>
       <div class="kpi"><div class="lbl">CONVIDADO EXTRA</div><div class="num" id="kExtra">—</div><div class="sub" id="kExtraSub">sugerido/pessoa</div></div>
-      <div class="kpi"><div class="lbl">TOTAL DE PESSOAS</div><div class="num" id="kPpl">—</div><div class="sub" id="kPplSub"></div></div>
+      <div class="kpi"><div class="lbl" id="kPplLbl">TOTAL DE PESSOAS</div><div class="num" id="kPpl">—</div><div class="sub" id="kPplSub"></div></div>
       <div class="kpi hi"><div class="lbl">SALDO GARANTIDO</div><div class="num" id="kSaldo">—</div><div class="sub" id="kSaldoSub"></div></div>
     </div>
 
@@ -256,6 +256,8 @@ const LOCAIS={
   dipal:{nome:'Di Paladare (jantar + kids)',fmt:'festa',kids:true,cap:300,custo:N=>interp(dpP1,N),marg:N=>interp(dpP1,N)/N,obs:'Jantar + espaço kids + DJ + decoração. Cabe 300; as duas turmas juntas.'},
   vougue_jan:{nome:'Vougue — Colação + jantar',fmt:'festa',kids:true,cap:100,custo:N=>vg(15990,19900,N),marg:N=>vg(15990,19900,N)/N,obs:'Jantar buffet + decoração + espaço kids. Até 80 = R$15.990 · até 100 = R$19.900.'},
   obiava:{nome:'Obiava (jantar + parquinho)',fmt:'festa',kids:true,cap:500,custo:N=>6500+85*N+500,marg:()=>85,obs:'Buffet + parquinho c/ monitora. Salão grande. Decoração à parte.'},
+  escola_cer:{nome:'Na própria escola — cerimônia',fmt:'cer',kids:false,cap:0,custo:N=>0,marg:()=>0,obs:'Cerimônia na escola: custo do espaço = R$0. Mostra o piso de custo (só os itens da formatura).'},
+  escola_fes:{nome:'Na própria escola — com estrutura',fmt:'festa',kids:true,cap:0,custo:N=>0,marg:()=>0,obs:'Evento na escola: custo do espaço = R$0. Comida, decoração e brinquedos entram como custos editáveis (ou por conta das famílias).'},
 };
 const TIPOS=[{v:'formando',l:'× criança'},{v:'pessoa',l:'× pessoa'},{v:'colaborador',l:'× colaborador'},{v:'fixo',l:'fixo (por evento)'}];
 function ci(n,t,c){return {nome:n,tipo:t,custo:c,cobrado:c};}
@@ -390,8 +392,15 @@ function render(){
   document.getElementById('kCusto').textContent=BRL(r.custoBase/r.students);
   document.getElementById('kExtra').textContent=r.pExtra>0?BRL(r.pExtra):'—';
   document.getElementById('kExtraSub').textContent=r.usaExtraDef?`definido · sugerido ${BRL(r.pExtraCalc)}`:'sugerido/pessoa';
-  document.getElementById('kPpl').textContent=r.totalPessoas;
-  document.getElementById('kPplSub').textContent=`${r.students} crianças + convidados + ${r.nExtras} extras`;
+  if(r.dois){
+    document.getElementById('kPplLbl').textContent='PESSOAS POR EVENTO';
+    document.getElementById('kPpl').textContent=`${r.Ns[0]} · ${r.Ns[1]}`;
+    document.getElementById('kPplSub').textContent=`5A: ${r.Ns[0]} · 5B: ${r.Ns[1]} pessoas${r.nExtras?` (+${r.nExtras} extras no total)`:''}`;
+  }else{
+    document.getElementById('kPplLbl').textContent='TOTAL DE PESSOAS';
+    document.getElementById('kPpl').textContent=r.totalPessoas;
+    document.getElementById('kPplSub').textContent=`${r.students} crianças + convidados + ${r.nExtras} extras`;
+  }
   document.getElementById('kSaldo').textContent=BRL(r.saldoBase);
   document.getElementById('kSaldo').closest('.kpi').classList.toggle('hi',r.saldoBase>=0);
   document.getElementById('kSaldoSub').textContent=r.nExtras>0?`+ bônus se vierem ${r.nExtras} extras`:(r.saldoBase>=0?'sobra sobre o custo':'FALTA cobrir');
