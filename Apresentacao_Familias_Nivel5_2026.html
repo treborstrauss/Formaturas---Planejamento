@@ -47,9 +47,10 @@
 
   .pblock{margin-top:auto;padding-top:8px}
   .pblock .s{font-size:13px;color:var(--muted);letter-spacing:.02em}
-  .pblock .l1{font-family:var(--serif);font-size:32px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
-  .pblock .p{color:var(--gold);font-weight:800;font-size:15px;margin-top:2px}
-  .pblock .l2{font-size:14.5px;color:var(--ink2);margin-top:7px;border-top:1px dashed var(--line);padding-top:6px}
+  .pblock .big{font-family:var(--serif);font-size:34px;line-height:1.02;color:var(--gold);font-variant-numeric:tabular-nums}
+  .pblock .big span{color:var(--muted);font-size:15px}
+  .pblock .tot{font-size:15px;color:var(--ink2);margin-top:4px}
+  .pblock .l2{font-size:14px;color:var(--muted);margin-top:7px;border-top:1px dashed var(--line);padding-top:6px}
   .note{font-size:14px;color:var(--muted);margin-top:14px;line-height:1.4}
 
   ul.incl{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -158,18 +159,18 @@
       <div class="card">
         <h3>Star Happy</h3>
         <ul><li>Buffet infantil</li><li>Brinquedão, piscina de bolinhas, monitores</li></ul>
-        <div class="pblock"><div class="s">22 crianças (em 2 festas)</div><div class="l1">R$ 1.850</div><div class="p">ou 12× de R$ 162*</div><div class="l2">20 crianças: R$ 1.962 · 12× R$ 172</div></div>
+        <div class="pblock"><div class="s">22 crianças · 4 inclusos · em 2 festas</div><div class="big">12× de R$ 162<span>*</span></div><div class="tot">ou R$ 1.850 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 172 · à vista R$ 1.962</div></div>
       </div>
       <div class="card pick">
         <span class="chip gold" style="margin-bottom:2px">Melhor custo nesta trilha</span>
         <h3>Obiava</h3>
         <ul><li>Jantar + parquinho com monitora</li><li>Salão amplo</li></ul>
-        <div class="pblock"><div class="s">22 crianças</div><div class="l1">R$ 1.638</div><div class="p">ou 12× de R$ 143*</div><div class="l2">20 crianças: R$ 1.703 · 12× R$ 149</div></div>
+        <div class="pblock"><div class="s">22 crianças · 4 inclusos</div><div class="big">12× de R$ 143<span>*</span></div><div class="tot">ou R$ 1.638 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 149 · à vista R$ 1.703</div></div>
       </div>
       <div class="card">
         <h3>Vougue · com jantar</h3>
         <ul><li>Jantar buffet + espaço kids</li><li>Salão decorado</li></ul>
-        <div class="pblock"><div class="s">22 crianças</div><div class="l1">R$ 1.881</div><div class="p">ou 12× de R$ 165*</div><div class="l2">20 crianças: R$ 1.915 · 12× R$ 168</div></div>
+        <div class="pblock"><div class="s">22 crianças · 4 inclusos</div><div class="big">12× de R$ 165<span>*</span></div><div class="tot">ou R$ 1.881 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 168 · à vista R$ 1.915</div></div>
       </div>
     </div>
     <p class="note">*Preço por criança com desconto (à vista/até 3×, set–dez). Em 12×, +5%.</p>
@@ -187,7 +188,7 @@
       </div>
       <div class="card hero" style="text-align:center;align-items:center;justify-content:center">
         <span class="chip blue">Vougue · só colação</span>
-        <div class="pblock" style="margin-top:6px"><div class="s">22 crianças</div><div class="l1" style="font-size:48px">R$ 1.490</div><div class="p" style="font-size:18px">ou 12× de R$ 130*</div><div class="l2">20 crianças: R$ 1.513 · 12× R$ 132</div></div>
+        <div class="pblock" style="margin-top:6px"><div class="s">22 crianças · 4 inclusos</div><div class="big" style="font-size:44px">12× R$ 130<span>*</span></div><div class="tot" style="font-size:17px">ou R$ 1.490 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 132 · à vista R$ 1.513</div></div>
       </div>
     </div>
     <p class="note">*Com desconto (à vista/até 3×). Em 12×, +5%.</p>
@@ -196,23 +197,21 @@
   <!-- 8 CINEMA (surpresa) -->
   <section class="slide">
     <span class="chip green">A surpresa · a ideia diferente</span>
-    <h2 style="margin-top:12px">A cerimônia no cinema</h2>
-    <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center;margin-top:12px">
-      <div class="wrap">
-        <p style="font-size:22px">Uma sala de cinema só para a turma. A colação dura ~1h — perfeita para os pequenos:</p>
-        <ul style="font-size:20px;color:var(--ink2);line-height:1.55;padding-left:22px">
-          <li><b>Vídeos nível cinema</b> e retrospectiva no telão</li>
-          <li><b>Som e imagem profissionais</b>; poltronas em escada (todos veem)</li>
-          <li><b>Sábado de manhã</b>, no shopping, estacionamento fácil</li>
-        </ul>
-        <p class="fine">É a opção <b>mais em conta</b> de todas — e a mais diferente.</p>
+    <h2 style="margin-top:10px">A cerimônia no cinema</h2>
+    <p class="lead" style="margin-top:6px">Uma sala só para a turma (~1h): <b>vídeos nível cinema</b> no telão, som e imagem profissionais, poltronas em escada e sábado de manhã no shopping. Duas salas, conforme o número de convidados:</p>
+    <div class="cards c2" style="margin-top:16px">
+      <div class="card hero">
+        <span class="chip green">Sala Standard · melhor custo-benefício</span>
+        <h3>Até 140 lugares</h3>
+        <div class="pblock"><div class="s">22 crianças · 4 inclusos</div><div class="big" style="font-size:44px">12× R$ 61<span>*</span></div><div class="tot" style="font-size:17px">ou R$ 697 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 64 · à vista R$ 730</div></div>
       </div>
-      <div class="card hero" style="text-align:center;align-items:center;justify-content:center">
-        <span class="chip green">Cinema · melhor custo-benefício</span>
-        <div class="pblock" style="margin-top:6px"><div class="s">22 crianças</div><div class="l1" style="font-size:52px">R$ 697</div><div class="p" style="font-size:19px">ou 12× de R$ 61*</div><div class="l2">20 crianças: R$ 730 · 12× R$ 64</div></div>
+      <div class="card">
+        <span class="chip blue">Sala TSX · para muitos convidados</span>
+        <h3>Até 405 lugares</h3>
+        <div class="pblock"><div class="s">22 crianças · 4 inclusos</div><div class="big" style="font-size:44px">12× R$ 70<span>*</span></div><div class="tot" style="font-size:17px">ou R$ 796 à vista / até 3×</div><div class="l2">20 crianças: 12× R$ 73 · à vista R$ 838</div></div>
       </div>
     </div>
-    <p class="note">*Com desconto (à vista/até 3×). Em 12×, +5%. Para muitos convidados, há a sala grande (TSX) por ~R$ 796.</p>
+    <p class="note">*Preço por criança com desconto (à vista/até 3×, set–dez). Em 12×, +5%.</p>
   </section>
 
   <!-- 9 COMPARATIVO -->
@@ -257,6 +256,7 @@ const BRL=n=>"R$ "+Math.round(n).toLocaleString("pt-BR");
 const p12=x=>Math.round(x*1.05/12);
 const OPCOES=[
   {nome:"Cinema — Sala Standard",fmt:"cer",preco:697,hl:true},
+  {nome:"Cinema — Sala TSX",fmt:"cer",preco:796},
   {nome:"Vougue — só colação",fmt:"cer",preco:1490},
   {nome:"Obiava — jantar + parquinho",fmt:"festa",preco:1638},
   {nome:"Star Happy — buffet infantil",fmt:"festa",preco:1850},
