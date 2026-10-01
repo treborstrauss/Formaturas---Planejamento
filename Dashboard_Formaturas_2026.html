@@ -290,6 +290,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
 // ================= LOCAIS =================
 const LOCAIS = {
+  igreja:   {nome:'Igreja (Prof. Adriano) — espaço cedido', fmt:'cer', kids:false, cap:0, custo:N=>0, marg:()=>0, obs:'Espaço cedido pelo professor Adriano (sábado 12/12), sem custo de local. Ideal para o preço único: mantenha os itens como “× formando” e lance limpeza/decoração fixas, se houver.'},
   fep:      {nome:'Auditório FEP', fmt:'cer', kids:false, cap:0, custo:N=>1790, marg:()=>0, obs:'Meia diária c/ projetor. Ótimo p/ cerimônia digna e barata.'},
   cineplus5:{nome:'Cineplus — Sala Standard', fmt:'cer', kids:false, cinema:true, cap:140, custo:N=>3000, marg:()=>0, obs:'Cinema no Shopping Jardim das Américas. 140 lugares, 4h, R$3.000.'},
   cineplus6:{nome:'Cineplus — Sala TSX Laser', fmt:'cer', kids:false, cinema:true, cap:405, custo:N=>4800, marg:()=>0, obs:'Sala grande (405 lugares), 4h, R$4.800. Cabe as duas turmas juntas.'},
